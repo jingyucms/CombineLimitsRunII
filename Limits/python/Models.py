@@ -137,16 +137,25 @@ class Model(object):
 
     def fit2D(self,ws,hist,name,save=False,doErrors=False,saveDir='', xFitRange=[0,30], yFitRange=[0,30], logy=False, xRange=[], yRange=[]):
         '''Fit the model to a histogram and return the fit values'''
-
+        
         if isinstance(hist,ROOT.TH1):
             dhname = 'dh_{0}'.format(name)
             hist = ROOT.RooDataHist(dhname, dhname, ROOT.RooArgList(ws.var(self.x),ws.var(self.y)), hist)
+
         #self.build(ws,name)
         model = ws.pdf(name)
         #ws.var('x').setRange('xRange', xFitRange[0], xFitRange[1])
         #ws.var('y').setRange('yRange', yFitRange[0], yFitRange[1])
+        #print xRange[0], xRange[1], yRange
+        #ws.Print()
+        #if yRange:
+            #ws.var('invMassMuMu').setRange(xRange[0], xRange[1])
+            #ws.var('visFourbodyMass').setRange(yRange[0], yRange[1])
         #print ("X_FIT_RANGE=", xFitRange, "\tY_FIT_RANGE=", yFitRange)
-        fr = model.fitTo(hist,ROOT.RooFit.Save(),ROOT.RooFit.SumW2Error(True),ROOT.RooFit.PrintLevel(-1))
+
+        fr = model.fitTo(hist,ROOT.RooFit.Minimizer("Minuit2", "Minos"), ROOT.RooFit.Save(),ROOT.RooFit.SumW2Error(True),ROOT.RooFit.PrintLevel(-1))
+        #fr = model.fitTo(hist,ROOT.RooFit.Minimizer("GSLMultiMin", "conjugatefr"), ROOT.RooFit.Save(),ROOT.RooFit.SumW2Error(True),ROOT.RooFit.PrintLevel(3))
+        
         #fr = model.fitTo(hist,ROOT.RooFit.Save(),ROOT.RooFit.SumW2Error(True),ROOT.RooFit.Minos(True))
         pars = fr.floatParsFinal()
         vals = {}
@@ -157,6 +166,7 @@ class Model(object):
             #errs[pars.at(p).GetName()] = (pars.at(p).getAsymErrorHi(), pars.at(p).getAsymErrorLo())
             #print pars.at(p).GetName(), pars.at(p).getValV(), pars.at(p).getError(), pars.at(p).getVal(), pars.at(p).getAsymErrorHi(), pars.at(p).getAsymErrorLo()
 
+        #print "xRange:", xRange
         if save:
             if saveDir: python_mkdir(saveDir)
             savename = '{}/{}_{}'.format(saveDir,self.name,name) if saveDir else '{}_{}'.format(self.name,name)
@@ -241,6 +251,7 @@ class Model(object):
             canvas.Print('{0}_xproj.png'.format(savename))
 
             y = ws.var(self.y)
+            #yRange = [18.75, 180]
             if yRange:
                 yFrame = y.frame(ROOT.RooFit.Range(*yRange))
             else:
@@ -366,7 +377,11 @@ def buildSpline(ws,label,MH,masses,values):
                 print 'Masses are not in increasing order for', label
                 print masses
                 raise ValueError
-            spline  = ROOT.RooSpline1D(label,  label,  ws.var(MH), len(masses), array('d',masses), array('d',values))
+            #if "integral" in label:
+            #    print label
+            #    print array('d',masses)
+            #    print array('d',values)
+            spline  = ROOT.RooSpline1D(label,  label,  ws.var(MH), len(masses), array('d',masses), array('d',values), "CSPLINE")
     else: # TFn case
         if not isinstance(MH, list): MH = [MH]
         args = ROOT.RooArgList(*[ws.var(mh) for mh in MH])
@@ -436,12 +451,14 @@ class Param(object):
                 args.Add(av)
         else:
             shiftFormula = '{}'.format(value)
+        #print "DEBUG:", paramName, shifts
         for shift in shifts:
             up = shifts[shift]['up']
             down = shifts[shift]['down']
             if isinstance(value,basestring) or  abs(up/value)>uncertainty or abs(down/value)>uncertainty:
                 ws.factory('{}[0,-10,10]'.format(shift))
                 shiftFormula += ' + TMath::Max(0,@{shift})*({up}) + TMath::Min(0,@{shift})*({down})'.format(shift=len(args),up=up,down=down)
+                #print "shiftFormula:", shiftFormula
                 args.Add(ws.var(shift))
         arglist = ROOT.RooArgList(args)
         param = ROOT.RooFormulaVar(paramName, paramName, shiftFormula, arglist)
@@ -459,8 +476,10 @@ class Spline(object):
         masses = self.kwargs.get('masses', [])
         values = self.kwargs.get('values', [])
         shifts = self.kwargs.get('shifts', {})
+        channel = self.kwargs.get('channel', '')
         uncertainty = self.kwargs.get('uncertainty',0.000)
         splineName = label
+        #print "Building splines:", ws.var("tauScale")
         if shifts:
             if isinstance(values,list):
                 args = ROOT.TList()
@@ -476,11 +495,15 @@ class Spline(object):
                     if any([ v == 0 for v in values]):
                         logging.warning('Zero value for {}: {}'.format(splineName, ' '.join(['{}'.format(v) for v in values])))
                     if any([abs(u/v)>uncertainty if v else u for u,v in zip(up,values)]) or any([abs(d/v)>uncertainty if v else d for d,v in zip(down,values)]):
-                        ws.factory('{}[0,-10,10]'.format(shift))
+                        shiftText = channel+'_'+shift
+                        ws.factory('{}[0,-10,10]'.format(shiftText))
+                        #ws.factory('{}[0,-10,10]'.format(shift))
                         splineUp   = buildSpline(ws,upName,  self.mh,masses,up)
                         splineDown = buildSpline(ws,downName,self.mh,masses,down)
                         shiftFormula += ' + TMath::Max(0,@{shift})*@{up} + TMath::Min(0,@{shift})*@{down}'.format(shift=len(args),up=len(args)+1,down=len(args)+2)
-                        args.Add(ws.var(shift))
+                        
+                        #print "Building splines:", ws.var(shiftText)
+                        args.Add(ws.var(shiftText))
                         args.Add(splineUp)
                         args.Add(splineDown)
                 arglist = ROOT.RooArgList(args)
@@ -1008,7 +1031,7 @@ class Exponential(Model):
         # variables
         if not isinstance(lamb,str): ws.factory('{0}[{1}, {2}, {3}]'.format(lambdaName,*lamb))
         # build model
-        ws.factory("Exponential::{0}({1}, {2})".format(label,self.x,lambdaName))
+        ws.factory("RooExponential::{0}({1}, {2})".format(label,self.x,lambdaName))
         self.params = [lambdaName]
 
 class PolynomialExpr(Model):

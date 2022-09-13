@@ -30,11 +30,12 @@ class HaaLimits2D(HaaLimits):
 
     YRANGE = [50,1000]
     YBINNING = 950
-    YLABEL = 'm_{#mu#mu#tau_{#mu}#tau_{h}}'
+    YLABEL = 'm_{#mu#mu#tau#tau}'
     YVAR = 'visFourbodyMass'
     YCORRELATION = False
     SPLITY = False
     DOUBLEEXPO = False
+    LANDAU = False
     NUMEXPO = 1
 
     def __init__(self,histMap,tag='',do2DInterpolation=False,doParamFit=False):
@@ -77,22 +78,22 @@ class HaaLimits2D(HaaLimits):
         yVar = kwargs.pop('yVar',self.YVAR)
         tag = kwargs.pop('tag',region)
 
+        resonances = []
+        if self.XRANGE[0]<4:
+            resonances += ['jpsi']
+        if self.XRANGE[0] and self.XRANGE[1]>11:
+            resonances += ['upsilon']
+        continuums = ['cont1']
+        if self.XRANGE[0]<4:
+            continuums += ['cont2']
 
-        # h
-        if self.YRANGE[1]>100 and self.SPLITY:
-            resonances = []
-            if self.XRANGE[0]<4:
-                resonances += ['jpsi']
-            if self.XRANGE[0] and self.XRANGE[1]>11:
-                resonances += ['upsilon']
-            continuums = ['cont1']
-            if self.XRANGE[0]<4:
-                continuums += ['cont2']
+        if self.SPLITY:            
             erfs = {}
             conts = {}
             bgs = {}
             for rname in resonances+continuums:
                 nameE = 'erf_{}{}'.format(rname,'_'+tag if tag else '')
+                #print "JINGYU3:", rname, nameE, self.YCORRELATION
                 if rname=='cont1' and self.YCORRELATION:
                     # build the correlation model for the y variable parameters
                     erfShiftName = kwargs.pop('erfShift_{}'.format(nameE),'erfShift_{}'.format(nameE))
@@ -112,25 +113,6 @@ class HaaLimits2D(HaaLimits):
                         }
                     )
                     erfShiftExpr.build(workspace,erfShiftName)
-
-                    #erfScaleName = kwargs.pop('erfScale_{}'.format(nameE),'erfScale_{}'.format(nameE))
-                    #erfScaleA0Name = 'erfScaleA0{}'.format('_'+tag if tag else '')
-                    #erfScaleA0 = kwargs.pop(erfScaleA0Name,[0.06,0.005,5])
-                    #if isinstance(erfScaleA0,str): erfScaleA0Name = erfScaleA0
-                    #erfScaleA1Name = 'erfScaleA1{}'.format('_'+tag if tag else '')
-                    #erfScaleA1 = kwargs.pop(erfScaleA1Name,[0,-0.01,0.01])
-                    #if isinstance(erfScaleA1,str): erfScaleA1Name = erfScaleA1
-                    #erfScaleExpr = Models.Expression(erfScaleName,
-                    #    expr = '{x}*{a1}+{a0}'.format(x=xVar,a0=erfScaleA0Name,a1=erfScaleA1Name),
-                    #    variables = [xVar,erfScaleA1Name,erfScaleA0Name],
-                    #    **{
-                    #        xVar: xVar,
-                    #        erfScaleA1Name: erfScaleA1,
-                    #        erfScaleA0Name: erfScaleA0,
-                    #    }
-                    #)
-                    #erfScaleExpr.build(workspace,erfScaleName)
-
 
                     erf = Models.Erf('erf1',
                         x = yVar,
@@ -169,10 +151,9 @@ class HaaLimits2D(HaaLimits):
             return
 
                 
-        elif self.YRANGE[1]>100:
+        else:
             nameE = 'erf{}'.format('_'+tag if tag else '')
-
-            if not self.DOUBLEEXPO:
+            if not self.DOUBLEEXPO and not self.LANDAU and "TauHad" in tag:
                 if self.YCORRELATION:
                     # build the correlation model for the y variable parameters
                     erfShiftName = kwargs.pop('erfShift_{}'.format(nameE),'erfShift_{}'.format(nameE))
@@ -194,25 +175,6 @@ class HaaLimits2D(HaaLimits):
                     )
                     erfShiftExpr.build(workspace,erfShiftName)
 
-                    #erfScaleName = kwargs.pop('erfScale_{}'.format(nameE),'erfScale_{}'.format(nameE))
-                    #erfScaleA0Name = 'erfScaleA0{}'.format('_'+tag if tag else '')
-                    #erfScaleA0 = kwargs.pop(erfScaleA0Name,[0.06,0.005,5])
-                    #if isinstance(erfScaleA0,str): erfScaleA0Name = erfScaleA0
-                    #erfScaleA1Name = 'erfScaleA1{}'.format('_'+tag if tag else '')
-                    #erfScaleA1 = kwargs.pop(erfScaleA1Name,[0,-0.01,0.01])
-                    #if isinstance(erfScaleA1,str): erfScaleA1Name = erfScaleA1
-                    #erfScaleExpr = Models.Expression(erfScaleName,
-                    #    expr = '{x}*{a1}+{a0}'.format(x=xVar,a0=erfScaleA0Name,a1=erfScaleA1Name),
-                    #    variables = [xVar,erfScaleA1Name,erfScaleA0Name],
-                    #    **{
-                    #        xVar: xVar,
-                    #        erfScaleA1Name: erfScaleA1,
-                    #        erfScaleA0Name: erfScaleA0,
-                    #    }
-                    #)
-                    #erfScaleExpr.build(workspace,erfScaleName)
-
-
                     erf = Models.Erf('erf1',
                         x = yVar,
                         #erfScale = erfScaleName,
@@ -229,27 +191,11 @@ class HaaLimits2D(HaaLimits):
                         erfShift = kwargs.pop('erfShift_{}'.format(nameE), [70,10,200]),
                     )
                     erf.build(workspace,nameE)
+                    #print "JINGYU4: nameE", nameE
 
                 nameC = 'conty{}'.format('_'+tag if tag else '')
                 if self.YCORRELATION:
-                    #lambdaName = kwargs.pop('lambda_{}'.format(nameC),'lambda_{}'.format(nameC))
-                    #lambdaA0Name = 'lambdaA0{}'.format('_'+tag if tag else '')
-                    #lambdaA0 = kwargs.pop(lambdaA0Name,[-0.025,-1,-0.001])
-                    #if isinstance(lambdaA0,str): lambdaA0Name = lambdaA0
-                    #lambdaA1Name = 'lambdaA1{}'.format('_'+tag if tag else '')
-                    #lambdaA1 = kwargs.pop(lambdaA1Name,[0,-0.002,0.002])
-                    #if isinstance(lambdaA1,str): lambdaA1Name = lambdaA1
-                    #lambdaExpr = Models.Expression(lambdaName,
-                    #    expr = '{x}*{a1}+{a0}'.format(x=xVar,a0=lambdaA0Name,a1=lambdaA1Name),
-                    #    variables = [xVar,lambdaA1Name,lambdaA0Name],
-                    #    **{
-                    #        xVar: xVar,
-                    #        lambdaA1Name: lambdaA1,
-                    #        lambdaA0Name: lambdaA0,
-                    #    }
-                    #)
-                    #lambdaExpr.build(workspace,lambdaName)
-
+                    
                     cont = Models.Exponential('conty',
                         x = yVar,
                         #lamb = lambdaName,
@@ -262,20 +208,21 @@ class HaaLimits2D(HaaLimits):
                         x = yVar,
                         lamb = kwargs.pop('lambda_{}'.format(nameC), [-0.05,-1,0]),
                     )
-                    cont.build(workspace,nameC)
+                    cont.build(workspace, nameC)
+                    #print "JINGYU4: nameC", nameC
 
                 bg = Models.Prod('bg',
                     nameE,
                     nameC,
                 )
 
-            if self.DOUBLEEXPO:
+            elif self.DOUBLEEXPO:
                 # Double exponential
                 nameE1 = 'erf1{}'.format('_'+tag if tag else '')
                 erf1 = Models.Erf('erf1',
                     x = yVar,
-                    erfScale = kwargs.pop('erfScale_{}'.format(nameE1), [0.05,0,10]),
-                    erfShift = kwargs.pop('erfShift_{}'.format(nameE1), [70,10,200]),
+                    erfScale = kwargs.pop('erfScale_{}'.format(nameE1), [0.05,0,1]),
+                    erfShift = kwargs.pop('erfShift_{}'.format(nameE1), [90,10,200]),
                 )
                 erf1.build(workspace,nameE1)
 
@@ -297,7 +244,7 @@ class HaaLimits2D(HaaLimits):
                 erf2 = Models.Erf('erf2',
                     x = yVar,
                     #erfScale = kwargs.pop('erfScale_{}'.format(nameE2), [0.05,0,10]),
-                    #erfShift = kwargs.pop('erfShift_{}'.format(nameE2), [70,10,200]),
+                    #erfShift = kwargs.pop('erfShift_{}'.format(nameE2), [100,80,150]),
                     erfScale = kwargs.pop('erfScale_{}'.format(nameE1),'erfScale_{}'.format(nameE1)),
                     erfShift = kwargs.pop('erfShift_{}'.format(nameE1),'erfShift_{}'.format(nameE1)),
                 )
@@ -317,157 +264,74 @@ class HaaLimits2D(HaaLimits):
                 nameB2 = 'bg2{}'.format('_'+tag if tag else '')
                 bg2.build(workspace,nameB2)
 
+                nameE3 = 'erf3{}'.format('_'+tag if tag else '')
+                erf3 = Models.Erf('erf3',
+                    x = yVar,
+                    #erfScale = kwargs.pop('erfScale_{}'.format(nameE2), [0.05,0,10]),
+                    #erfShift = kwargs.pop('erfShift_{}'.format(nameE2), [100,80,150]),
+                    erfScale = kwargs.pop('erfScale_{}'.format(nameE1),'erfScale_{}'.format(nameE1)),
+                    erfShift = kwargs.pop('erfShift_{}'.format(nameE1),'erfShift_{}'.format(nameE1)),
+                )
+                erf3.build(workspace,nameE3)
+
+                nameC3 = 'conty3{}'.format('_'+tag if tag else '')
+                cont3 = Models.Exponential('conty3',
+                    x = yVar,
+                    lamb = kwargs.pop('lambda_{}'.format(nameC3), [-0.001,-0.01,0.01]),
+                )
+                cont3.build(workspace,nameC3)
+
+                bg3 = Models.Prod('bg',
+                    nameE3,
+                    nameC3,
+                )
+                nameB3 = 'bg3{}'.format('_'+tag if tag else '')
+                bg3.build(workspace,nameB3)
+
                 bg = Models.Sum('bg',
                     **{
                         nameB1: [0.95,0,1],
-                        nameB2: [0.05,0,1],
+                        nameB2: [0.04,0,1],
+                        nameB3: [0.01,0,1],
+                        'recursive': True,
                     }
                 )
-        else:
-            # Landau only
-            #bg = Models.Landau('bg',
-            #    x = yVar,
-            #    mu    = [5,0,20],
-            #    sigma = [1,0,10],
-            #)
+            elif self.LANDAU:
+                ## landua plus upsilon gaussian
+                nameL1 = 'land{}'.format('_'+tag if tag else '')
 
-            # landau plus gaussian
-            #land1 = Models.Landau('land1',
-            #    x = yVar,
-            #    mu    = [5,0,20],
-            #    sigma = [1,0,10],
-            #)
-            #nameL1 = 'land1{}'.format('_'+tag if tag else '')
-            #land1.build(workspace,nameL1)
+                land = Models.Landau('land',
+                                   x = yVar,
+                                   mu    = kwargs.pop('mu_{}'.format(nameL1), [90,40,100]),
+                                   sigma = kwargs.pop('sigma_{}'.format(nameL1), [50,0,100]),
+                )
+                land.build(workspace, nameL1)
 
-            ## add a guassian summed for tt ?
-            #gaus1 = Models.Gaussian('gaus1',
-            #    x = yVar,
-            #    mean = [1.5,0,4],
-            #    sigma = [0.4,0,2],
-            #)
-            #nameG1 = 'gaus1{}'.format('_'+tag if tag else '')
-            #gaus1.build(workspace,nameG1)
+                bg = Models.Sum('bg',
+                                **{
+                                    nameL1:[0.5, 0, 1],
+                                    'recursive':True,
+                                }
+                )
+            else:
+                nameDG = 'dg{}'.format('_'+tag if tag else '')
+                
+                dg = Models.DoubleSidedGaussian('dg',
+                    x = yVar,
+                    mean    = kwargs.pop('mu_{}'.format(nameDG), [90,40,100]),
+                    sigma1  = kwargs.pop('sigma1_{}'.format(nameDG), [50,0,100]),
+                    sigma2  = kwargs.pop('sigma2_{}'.format(nameDG), [50,0,100]),
+                )
+                dg.build(workspace, nameDG)
+                
+                bg = Models.Sum('bg',
+                                **{
+                                    nameDG:[0.5, 0, 1],
+                                    'recursive':True,
+                                }
+                )
 
-            #bg = Models.Sum('bg',
-            #    **{
-            #        nameL1     : [0.9,0,1],
-            #        nameG1     : [0.5,0,1],
-            #        'recursive': True,
-            #    }
-            #)
-
-            ## landua plus upsilon gaussian
-            nameL1 = 'land1{}'.format('_'+tag if tag else '')
-            #land1 = Models.Landau('land1',
-            #    x = yVar,
-            #    mu    = kwargs.pop('mu_{}'.format(nameL1), [1.5,0,5]),
-            #    sigma = kwargs.pop('sigma_{}'.format(nameL1), [0.4,0,2]),
-            #)
-            #land1.build(workspace,nameL1)
-
-            ## jpsi
-            ##jpsi2 = Models.Voigtian('jpsi2S',
-            ##    x = yVar,
-            ##    mean  = [3.7,3.6,3.8],
-            ##    sigma = [0.1,0.01,0.5],
-            ##    width = [0.1,0.01,0.5],
-            ##)
-            ##nameJ2 = 'jpsi2Stt'
-            ##jpsi2.build(workspace,nameJ2)
-
-
-            ## add a guassian for upsilon
-            #nameU1 = 'upsilontt'
-            #upsilon1 = Models.Gaussian('upsilon1',
-            #    x = yVar,
-            #    mean  = kwargs.pop('mean_{}'.format(nameU1), [6,5,7]),
-            #    sigma = kwargs.pop('sigma_{}'.format(nameU1), [0.02,0,1]),
-            #)
-            #upsilon1.build(workspace,nameU1)
-
-            #bg = Models.Sum('bg',
-            #    **{
-            #        nameL1     : [0.95,0,1],
-            #        #nameJ2     : [0.1,0,1],
-            #        nameU1     : [0.1,0,1],
-            #        'recursive': True,
-            #    }
-            #)
-
-            bg = Models.Landau('land1',
-                x = yVar,
-                mu    = kwargs.pop('mu_{}'.format(nameL1), [1.5,0,5]),
-                sigma = kwargs.pop('sigma_{}'.format(nameL1), [0.4,0,2]),
-            )
-
-
-        #cont1 = Models.Exponential('conty1',
-        #    x = yVar,
-        #    #lamb = [-0.20,-1,0], # kinfit
-        #    lamb = [-0.05,-1,0], # visible
-        #)
-        #nameC1 = 'conty1{}'.format('_'+tag if tag else '')
-        #cont1.build(workspace,nameC1)
-
-        ## higgs fit (mmtt)
-        #if self.YRANGE[1]>100:
-        #    erf1 = Models.Erf('erf1',
-        #        x = yVar,
-        #        erfScale = [0.05,0,1],
-        #        erfShift = [70,10,200],
-        #    )
-        #    nameE1 = 'erf1{}'.format('_'+tag if tag else '')
-        #    erf1.build(workspace,nameE1)
-
-        #    bg = Models.Prod('bg',
-        #        nameE1,
-        #        nameC1,
-        #    )
-        ## pseudo fit (tt)
-        #else:
-        #    erf1 = Models.Erf('erf1',
-        #        x = yVar,
-        #        erfScale = [1,0.01,10],
-        #        erfShift = [1,0.1,10],
-        #    )
-        #    nameE1 = 'erf1{}'.format('_'+tag if tag else '')
-        #    erf1.build(workspace,nameE1)
-
-        #    erfc1 = Models.Prod('erfc1',
-        #        nameE1,
-        #        nameC1,
-        #    )
-        #    nameEC1 = 'erfc1{}'.format('_'+tag if tag else '')
-        #    erfc1.build(workspace,nameEC1)
-
-        #    # add an upsilon to tt resonance
-        #    #upsilon = Models.Gaussian('upsilony',
-        #    #    x = yVar,
-        #    #    mean  = [5.5,5,6.5],
-        #    #    sigma = [0.25,0.1,1],
-        #    #)
-        #    #nameU = 'upsilony{}'.format('_'+tag if tag else '')
-        #    #upsilon.build(workspace,nameU)
-
-        #    # add a guassian summed for tt ?
-        #    gaus1 = Models.Gaussian('gaus1',
-        #        x = yVar,
-        #        mean = [1.5,0,4],
-        #        sigma = [0.4,0,2],
-        #    )
-        #    nameG1 = 'gaus1{}'.format('_'+tag if tag else '')
-        #    gaus1.build(workspace,nameG1)
-
-        #    bg = Models.Sum('bg',
-        #        **{ 
-        #            nameEC1    : [0.9,0,1],
-        #            nameG1     : [0.5,0,1],
-        #            #nameU      : [0.5,0,1],
-        #            'recursive': True,
-        #        }
-        #    )
-
+        #print workspace.Print()
         name = 'bg_{}'.format(region)
         bg.build(workspace,name)
 
@@ -476,8 +340,8 @@ class HaaLimits2D(HaaLimits):
 
     def buildModel(self,region,**kwargs):
         workspace = kwargs.pop('workspace',self.workspace)
-        tag = kwargs.pop('tag',region)
-
+        #tag = kwargs.pop('tag',region)
+        
         # build the x variable
         self._buildXModel(region+'_x',workspace=workspace,**kwargs)
 
@@ -588,6 +452,7 @@ class HaaLimits2D(HaaLimits):
             jpsi = Models.Sum('jpsi', **jpsi)
             jpsi.build(workspace,nameJ)
 
+            #if self.XRANGE[0]<4 or self.XRANGE[0]>10.9:
             if self.XRANGE[0]<4:
                 nameC = 'cont_{}_xy'.format(region)
                 #cont = {'extended': True}
@@ -682,7 +547,8 @@ class HaaLimits2D(HaaLimits):
                 'bg_{}_x'.format(region),
             )
         else:
-            if self.XRANGE[0]<4 and not (doPoly or doPolyExpo): 
+            if (self.XRANGE[0]<4 or self.XRANGE[0]>10.9) and not (doPoly or doPolyExpo):
+                #print "JINGYU6:", "doPoly", doPoly, "doPolyExpo", doPolyExpo
                 cont1 = Models.Prod('cont1',
                     'cont1_{}_x'.format(region),
                     'bg_{}_y'.format(region),
@@ -690,12 +556,16 @@ class HaaLimits2D(HaaLimits):
                 name = 'cont1_{}_xy'.format(region)
                 cont1.build(workspace,name)
 
+                #print "JINGYU6:", cont1, name
+
                 cont2 = Models.Prod('cont2',
                     'cont2_{}_x'.format(region),
                     'bg_{}_y'.format(region),
                 )
                 name = 'cont2_{}_xy'.format(region)
                 cont2.build(workspace,name)
+
+                print "JINGYU6:", cont2, name
             else:
                 cont1 = Models.Prod('cont',
                     'cont1_{}_x'.format(region),
@@ -748,29 +618,47 @@ class HaaLimits2D(HaaLimits):
 
     def fitSignal(self,h,a,region,shift='',**kwargs):
         scale = kwargs.get('scale',1)
+        #print "scale:", scale
         if isinstance(scale,dict): scale = scale.get(self.SIGNAME.format(h=h,a=a),1)
         ygausOnly = kwargs.get('ygausOnly',False)
         isKinFit = kwargs.get('isKinFit',False)
         yFitFunc = kwargs.get('yFitFunc','G')
         dobgsig = kwargs.get('doBackgroundSignal',False)
         results = kwargs.get('results',{})
-        histMap = self.histMap[region][shift]
         tag = kwargs.get('tag','{}{}'.format(region,'_'+shift if shift else ''))
 
+        print "Fitting signals..."
+        histMap = self.histMap[region][shift]
+        #print "histMap:", histMap, "scale:", scale
+
+        print isKinFit, region
         if self.YRANGE[1] > 100: 
             if yFitFunc == "DCB_Fix": initialMeans = self.GetInitialDCBMean()
-            if "DCB" in yFitFunc: initialValuesDCB = self.GetInitialValuesDCB(isKinFit=isKinFit)
+            if "DCB" in yFitFunc and 'PP' in region:
+                initialValuesDCB = self.GetInitialValuesDCB(isKinFit=True)
+            elif "DCB" in yFitFunc and 'FP' in region:
+                initialValuesDCB = self.GetInitialValuesDCB(isKinFit=False)
             elif yFitFunc == "DG": initialValuesDG = self.GetInitialValuesDG(region=region)
             elif yFitFunc == "L": initialValuesL = self.GetInitialValuesDitau(isLandau=True)
             elif yFitFunc == "V": initialValuesV = self.GetInitialValuesDitau(isLandau=False)
             elif yFitFunc == "BC": initialValuesBC =self.GetInitialValuesBC(region=region)
             elif yFitFunc == "DV": initialValuesDV =self.GetInitialValuesDV(region=region)
+            elif yFitFunc == "DVh": initialValuesDVh = self.GetInitialValuesDVh(region=region)
 
+        #print initialValuesDCB
         aval = self.aToFloat(a)
         thisxrange = [0.8*aval, 1.2*aval]
-        thisyrange = [0.15*h, 1.2*h] if self.YRANGE[1]>100 else [self.YRANGE[0], 1.2*aval]
+        thisyrange = [0.2*h, 1.2*h] if self.YRANGE[1]>100 else [self.YRANGE[0], 1.2*aval]
         if self.YRANGE[1]>100:
-            thisyrange = [0.15*h, 1.2*h]
+            if "TauHadTauHad" in region and h == 125:
+                thisyrange = [1, 300]
+            elif "TauHadTauHad" in region and h == 1000:
+                thisyrange = [1, 2000]
+            elif h == 125:
+                thisyrange = [20, 180]
+            else:
+                thisyrange = [1, 2000]
+        #print "yRange:", thisyrange
         ws = ROOT.RooWorkspace('sig')
         ws.factory('{0}[{1}, {2}]'.format(self.XVAR,*thisxrange)) 
         ws.var(self.XVAR).setUnit('GeV')
@@ -780,30 +668,40 @@ class HaaLimits2D(HaaLimits):
         ws.var(self.YVAR).setUnit('GeV')
         ws.var(self.YVAR).setPlotLabel(self.YLABEL)
         ws.var(self.YVAR).SetTitle(self.YLABEL)
-        modelx = Models.Voigtian('sigx',
-           x = self.XVAR,
-            mean  = [aval,0.9975*aval,1.0025*aval],#.9975,1.0025
-            width = [0.0065*aval,0.001,1],#0.01*aval
-            sigma = [0.0070*aval,0.001,1],#0.01*aval
-        # modelx=Models.Gaussian('sigx',
-        #                        x=self.XVAR,
-        #                        mean=[aval,0.90*aval,1.1*aval],
-        #                        sigma=[0.04*aval,0.0001,1]
-                               
-                               )
+        if h == 125:
+            modelx = Models.Voigtian('sigx',
+                                     x = self.XVAR,
+                                     mean  = [aval,0.9975*aval,1.0025*aval],#.9975,1.0025
+                                     width = [0.0065*aval,0.001,1],#0.01*aval
+                                     sigma = [0.0070*aval,0.001,1],#0.01*aval
+                                     #mean = [17.9755, 17.9755, 17.9755],
+                                     #width = [0.145201, 0.145201, 0.145201],
+                                     #sigma = [0.186729, 0.186729, 0.186729],
+                                     )
+        elif h == 1000:
+            modelx = Models.Voigtian('sigx',
+                                     x = self.XVAR,
+                                     mean  = [aval,0.9975*aval,1.0025*aval],#.9975,1.0025
+                                     width = [0.0065*aval,0.001*aval,aval],#0.01*aval
+                                     sigma = [0.0070*aval,0.001*aval,aval],#0.01*aval
+                                     #mean = [17.9755, 17.9755, 17.9755],
+                                     #width = [0.145201, 0.145201, 0.145201],
+                                     #sigma = [0.186729, 0.186729, 0.186729],
+                                     )
         modelx.build(ws, 'sigx')
         if self.YRANGE[1]>100: # y variable is h mass
             if yFitFunc == "G": 
                 modely = Models.Gaussian('sigy',
                     x = self.YVAR,
-                    mean  = [h,0,1.25*h],
-                    sigma = [0.1*h,0.01,0.5*h],
+                    mean  = [90,60,120],
+                    sigma = [0.1*h,0.01,0.8*h],
                 )
             elif yFitFunc == "V":
                 modely = Models.Voigtian('sigy',
                     x = self.YVAR,
                     mean  = [0.75*h,0,1.25*h],
-                    width = [0.1*h,0.01,0.5*h],
+                    width = [0.1
+                             *h,0.01,0.5*h],
                     sigma = [0.1*h,0.01,0.5*h],
                 )
             elif yFitFunc == "CB":
@@ -815,14 +713,30 @@ class HaaLimits2D(HaaLimits):
                     n = [0.5,.1,10],
                 )
             elif yFitFunc == "DCB":
+                m = initialValuesDCB["h"+str(h)+"a"+str(a)]["mean"]
+                sig = initialValuesDCB["h"+str(h)+"a"+str(a)]["sigma"]
+                A1 = initialValuesDCB["h"+str(h)+"a"+str(a)]["a1"]
+                A2 = initialValuesDCB["h"+str(h)+"a"+str(a)]["a2"]
+                N1 = initialValuesDCB["h"+str(h)+"a"+str(a)]["n1"]
+                N2 = initialValuesDCB["h"+str(h)+"a"+str(a)]["n2"]
+                if N1 > 100:
+                    N1_low = 100
+                    N1_high = 200
+                    N2_low = 0.
+                    N2_high = 1.
+                else:
+                    N1_low = 0.
+                    N1_high = 1.
+                    N2_low = 100
+                    N2_high = 200
                 modely = Models.DoubleCrystalBall('sigy',
                     x = self.YVAR,
-                    mean  = [h,0,1.25*h],
-                    sigma = [initialValuesDCB["h"+str(h)+"a"+str(a)]["sigma"],0.05*h,0.5*h],
-                    a1    = [initialValuesDCB["h"+str(h)+"a"+str(a)]["a1"],0.1,10],
-                    n1    = [initialValuesDCB["h"+str(h)+"a"+str(a)]["n1"],1,30],
-                    a2    = [initialValuesDCB["h"+str(h)+"a"+str(a)]["a2"],0.1,10],
-                    n2    = [initialValuesDCB["h"+str(h)+"a"+str(a)]["n2"],0.1,30],
+                    mean  = [m,   m-10,   m+10],
+                    sigma = [sig, sig-5,  sig+5],
+                    a1    = [A1,  0.5*A1, 2*A1],
+                    n1    = [N1,  N1_low, N1_high],
+                    a2    = [A2,  0.5*A2, 2*A2],
+                    n2    = [N2,  N2_low, N2_high],
                 )
             elif yFitFunc == "DCB_Fix":
                 MEAN = initialMeans["h"+str(h)+"a"+str(a)]["mean"]
@@ -837,29 +751,57 @@ class HaaLimits2D(HaaLimits):
                     n2    = [initialValuesDCB["h"+str(h)+"a"+str(a)]["n2"],0.1,5],
                 )
             elif yFitFunc == "DG":
-                modely = Models.DoubleSidedGaussian('sigy',
-                    x = self.YVAR,
-                    #mean  = [h,0,1.25*h],
-                    #sigma1 = [0.1*h,0.05*h,0.5*h],
-                    #sigma2 = [0.2*h,0.05*h,0.5*h],
-                    mean    = [initialValuesDG["h"+str(h)+"a"+str(a)]["mean"],0.68*h,0.78*h],
-                    sigma1  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma1"],0.06*h,0.13*h],
-                    sigma2  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma2"],0.06*h,0.13*h],
-                    yMax = self.YRANGE[1],
-                )
+                #print "DEBUG !!!"
+                if h == 125:
+                    modely = Models.DoubleSidedGaussian('sigy',
+                                                        x = self.YVAR,
+                                                        #mean  =  [93 ,80, 110],
+                                                        #sigma1 = [15, 10, 30],
+                                                        #sigma2 = [25, 10, 30],
+                                                        mean    = [initialValuesDG["h"+str(h)+"a"+str(a)]["mean"],80,120],
+                                                        sigma1  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma1"],10,50],
+                                                        sigma2  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma2"],10,50],
+                                                        yMax = self.YRANGE[1],
+                                                        )
+                    #print "YRANGE:", self.YRANGE
+                elif h == 1000:
+                    modely = Models.DoubleSidedGaussian('sigy',
+                                                        x = self.YVAR,
+                                                        mean    = [initialValuesDG["h"+str(h)+"a"+str(a)]["mean"],initialValuesDG["h"+str(h)+"a"+str(a)]["mean"]*0.6, initialValuesDG["h"+str(h)+"a"+str(a)]["mean"]*1.2],
+                                                        sigma1  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma1"],200,400],
+                                                        sigma2  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma2"],50,150],
+                                                        yMax = self.YRANGE[1],
+                                                        )
             elif yFitFunc == "DV":
                 modely = Models.DoubleSidedVoigtian('sigy',
                     x = self.YVAR,
-                    # mean  = [0.7*h,0.64*h,0.76*h],
-                    # sigma1 = [0.1*h,0.08*h,0.16*h],
-                    # sigma2 = [0.125*h,0.09*h,0.18*h],
-                    # width1 = [1.0,0.01,10.0],
-                    # width2 = [1.0,0.01,10.0],
-                    mean    = [initialValuesDV["h"+str(h)+"a"+str(a)]["mean"],0.68*h,0.76*h],
+                    #mean  =  [90,  80,  95],
+                    #sigma1 = [10,  1,   20],
+                    #sigma2 = [20,  10,  30],
+                    #width1 = [0.01, 0.0001,1.0],
+                    #width2 = [1, 0.1,10],
+                    mean    = [initialValuesDV["h"+str(h)+"a"+str(a)]["mean"],0.68*h,0.9*h],
                     sigma1  = [initialValuesDV["h"+str(h)+"a"+str(a)]["sigma1"],0.06*h,0.16*h],
                     sigma2  = [initialValuesDV["h"+str(h)+"a"+str(a)]["sigma2"],0.06*h,0.14*h],
                     width1  = [initialValuesDV["h"+str(h)+"a"+str(a)]["width1"],0.01,10.0],
-                    width2  = [initialValuesDV["h"+str(h)+"a"+str(a)]["width2"],0.01,10.0],
+                    width2  = [initialValuesDV["h"+str(h)+"a"+str(a)]["width2"],0.01,10.0],                 
+                    yMax = self.YRANGE[1],
+                )
+            elif yFitFunc == "DVh":
+                signal = "h"+str(h)+"a"+str(a)
+                init = initialValuesDVh[signal]
+                modely = Models.DoubleSidedVoigtian('sigy',
+                    x = self.YVAR,
+                    mean    = [init["mean"][0],init["mean"][1],init["mean"][2]],
+                    sigma1  = [init["sigma1"][0],init["sigma1"][1],init["sigma1"][2]],
+                    sigma2  = [init["sigma2"][0],init["sigma2"][1],init["sigma2"][2]],
+                    width1  = [init["width1"][0],init["width1"][1],init["width1"][2]],
+                    width2  = [init["width2"][0],init["width2"][1],init["width2"][2]],
+                    #mean = [init["mean"][0]],
+                    #sigma1  = [init["sigma1"][0]],
+                    #sigma2  = [init["sigma2"][0]],
+                    #width1  = [init["width1"][0]],
+                    #width2  = [init["width2"][0]],
                     yMax = self.YRANGE[1],
                 )
             elif yFitFunc == "MB":
@@ -1111,13 +1053,23 @@ class HaaLimits2D(HaaLimits):
             for param in results:
                 ws.var(param).setVal(results[param])
         hist = histMap[self.SIGNAME.format(h=h,a=a)]
+        #print "hist:", hist, "self.binned", self.binned
         saveDir = '{}/{}'.format(self.plotDir,shift if shift else 'central')
+        #print "DEBUG:", hist, name
+        args = hist.get()
+        print "DEBUG!!!", args.find('visFourbodyMass').getMax(), args.find('visFourbodyMass').getMin(), args.find('invMassMuMu').getMax(), args.find('invMassMuMu').getMin()
+        #hist.get().find(xVar).setBins(self.XBINNING)
+        #hist.get().find(self.YVAR).setBins(self.YBINNING)
+        ws.var(self.YVAR).setBins(self.YBINNING)
         results, errors = model.fit2D(ws, hist, name, saveDir=saveDir, save=True, doErrors=True, xRange=[0.9*aval,1.1*aval])
         if self.binned:
             integral = histMap[self.SIGNAME.format(h=h,a=a)].Integral() * scale
             integralerr = getHistogram2DIntegralError(histMap[self.SIGNAME.format(h=h,a=a)]) * scale
         else:
             integral = histMap[self.SIGNAME.format(h=h,a=a)].sumEntries('{0}>{2} && {0}<{3} && {1}>{4} && {1}<{5}'.format(self.XVAR,self.YVAR,*self.XRANGE+self.YRANGE)) * scale
+            print "integral:", h, a, histMap[self.SIGNAME.format(h=h,a=a)].sumEntries('{0}>{2} && {0}<{3} && {1}>{4} && {1}<{5}'.format(self.XVAR,self.YVAR,*self.XRANGE+self.YRANGE)), scale
+            #print "hist:", histMap[self.SIGNAME.format(h=h,a=a)], histMap[self.SIGNAME.format(h=h,a=a)].sumEntries('{0}>{2} && {0}<{3} && {1}>{4} && {1}<{5}'.format(self.XVAR,self.YVAR,*self.XRANGE+self.YRANGE))
+            #print "integral:", integral, '{0}>{2} && {0}<{3} && {1}>{4} && {1}<{5}'.format(self.XVAR,self.YVAR,*self.XRANGE+self.YRANGE), self.XVAR,self.YVAR,self.XRANGE,self.YRANGE, scale
             integralerr = getDatasetIntegralError(histMap[self.SIGNAME.format(h=h,a=a)],'{0}>{2} && {0}<{3} && {1}>{4} && {1}<{5}'.format(self.XVAR,self.YVAR,*self.XRANGE+self.YRANGE)) * scale
             if integral!=integral:
                 logging.error('Integral for spline is invalid: h{h} a{a} {region} {shift}'.format(h=h,a=a,region=region,shift=shift))
@@ -1128,6 +1080,8 @@ class HaaLimits2D(HaaLimits):
         savename = '{}/h{}_a{}_{}.json'.format(savedir,h,a,tag)
         jsonData = {'vals': results, 'errs': errors, 'integrals': integral, 'integralerrs': integralerr}
         self.dump(savename,jsonData)
+
+        print "results:", results
 
         return results, errors, integral, integralerr
 
@@ -1145,7 +1099,7 @@ class HaaLimits2D(HaaLimits):
         skipFit = kwargs.get('skipFit',False)
         dobgsig = kwargs.get('doBackgroundSignal',False)
         tag = kwargs.get('tag','{}{}'.format(region,'_'+shift if shift else ''))
-
+        
         histMap = self.histMap[region][shift]
 
         # initial fit
@@ -1195,6 +1149,7 @@ class HaaLimits2D(HaaLimits):
         elif yFitFunc == "DCB" : yparams = ['mean_sigy', 'sigma_sigy', 'a1_sigy', 'n1_sigy', 'a2_sigy', 'n2_sigy']
         elif yFitFunc == "DG"  : yparams = ['mean_sigy', 'sigma1_sigy', 'sigma2_sigy']
         elif yFitFunc == "DV"  : yparams = ['mean_sigy', 'sigma1_sigy', 'sigma2_sigy','width1_sigy','width2_sigy']
+        elif yFitFunc == "DVh" : yparams = ['mean_sigy', 'sigma1_sigy', 'sigma2_sigy','width1_sigy','width2_sigy']
         elif yFitFunc == "MB"  : yparams = ['scale_sigy']
         elif yFitFunc == "B"   : yparams = ['betaScale_sigy','betaA_sigy','betaB_sigy']
         elif yFitFunc == "BC"  : yparams = ['betaScale_sigy','betaA_sigy','betaB_sigy','mean_sigy','sigma_sigy']
@@ -1293,7 +1248,7 @@ class HaaLimits2D(HaaLimits):
                     'g1_frac'       : ROOT.TF1('g1_frac_h{}_{}'.format(h,tag),         '[0]+[1]*x+[2]*x*x', *self.ARANGE),
                     'g2_frac'       : ROOT.TF1('g2_frac_h{}_{}'.format(h,tag),         '[0]+[1]*x+[2]*x*x', *self.ARANGE),
                     #'integral'      : ROOT.TF1('integral_h{}_{}'.format(h,tag),  '[0]+TMath::Erf([1]+[2]*x)*TMath::Erfc([3]+[4]*x)', *self.ARANGE),
-                    'integral'      : ROOT.TF1('integral_h{}_{}'.format(h,tag),  '[0]+[1]*x+[2]*x*x', *self.ARANGE),
+                    'integral'      : ROOT.TF1('integral_h{}_{}'.format(h,tag),  '[0]+[1]*x+[2]*x*x+[3]*x*x*x', *self.ARANGE),
                     }
                 # set initial values
                 fitFuncs[h]['integral'].SetParameter(1,-0.005)
@@ -1307,10 +1262,12 @@ class HaaLimits2D(HaaLimits):
             logging.info('Fitting {}'.format(param))
             Hs = sorted(results)
             As = {h: [self.aToStr(a) for a in sorted([self.aToFloat(x) for x in results[h]])] for h in Hs}
+            print "As", As, Hs, results
             xvals = [h for h in Hs for a in As[h]]
             xerrs = [0] * len(xvals)
             yvals = [self.aToFloat(a) for h in Hs for a in As[h]]
             yerrs = [0] * len(yvals)
+            #print results[125]['4'], As[125]
             if param=='integral':
                 zvals = [integrals[h][a] for h in Hs for a in As[h]]
                 print "Here comes the integral"
@@ -1341,14 +1298,15 @@ class HaaLimits2D(HaaLimits):
             legend.SetFillColor(0)
             legend.SetNColumns(len(self.HMASSES))
 
-            for h in [125]: #,300,750]:
+            for h in self.HMASSES: #,300,750]:
                 xs = [yvals[i] for i in range(len(xvals)) if xvals[i]==h]
                 ys = [zvals[i] for i in range(len(xvals)) if xvals[i]==h]
-
+                errorxs = [0 for i in range(len(xvals)) if xvals[i]==h]
+                errorys = [zerrs[i] for i in range(len(xvals)) if xvals[i]==h]
                 g = ROOT.TGraph(len(xs),array('d',xs),array('d',ys))
                 if not self.do2D:
                     g.Fit(fitFuncs[h][param])
-                    g = ROOT.TGraph(len(xs),array('d',xs),array('d',ys)) # override so we dont plot the fits here
+                    g = ROOT.TGraphErrors(len(xs),array('d',xs),array('d',ys),array('d',errorxs),array('d', errorys)) # override so we dont plot the fits here
                 g.SetLineColor(self.COLORS[h])
                 g.SetMarkerColor(self.COLORS[h])
                 g.SetTitle('H({h})'.format(h=h))
@@ -1358,7 +1316,7 @@ class HaaLimits2D(HaaLimits):
 
                 fxs = []
                 fys = []
-                for a in range(self.ARANGE[0]*10,self.ARANGE[1]*10+1,1):
+                for a in range(int(self.ARANGE[0])*10,int(self.ARANGE[1])*10+1,1):
                     if self.do2D:
                         y = fitFuncs[param].Eval(h,a*0.1)
                     else:
@@ -1381,6 +1339,8 @@ class HaaLimits2D(HaaLimits):
             if self.doParamFit: fmg.Draw('L')
             legend.Draw()
             canvas.Print('{}.png'.format(savename))
+
+            #print 'DEBUG {}.png'.format(savename)
 
             if self.do2D:
                 savename = '{}/{}_Fit_vsH'.format(savedir,name)
@@ -1476,6 +1436,8 @@ class HaaLimits2D(HaaLimits):
             amasses += [a]
             a += self.ABINNING
 
+        #print "amasses:", amasses
+
         hmasses = []
         h = self.HRANGE[0]
         while h<=self.HRANGE[1]:
@@ -1492,12 +1454,18 @@ class HaaLimits2D(HaaLimits):
         elif yFitFunc == "DCB" : ym = Models.DoubleCrystalBall
         elif yFitFunc == "DG"  : ym = Models.DoubleSidedGaussian
         elif yFitFunc == "DV"  : ym = Models.DoubleSidedVoigtian
+        elif yFitFunc == "DVh" : ym = Models.DoubleSidedVoigtian
         elif yFitFunc == "MB"  : ym = Models.MaxwellBoltzmann
         elif yFitFunc == "B"   : ym = Models.Beta
         elif yFitFunc == "BC"  : ym = Models.BetaConv
         elif yFitFunc != "L" and yFitFunc != "errG" and yFitFunc != "G3" and yFitFunc != "G2": raise
 
-
+        print "Building splines..."
+        print self.SPLINENAME, region, self.do2D, self.doParamFit, xparams, yparams
+        #print "fitFuncs:", fitFuncs['']
+        #channelText = region.split("_")[0]
+        channelText = region.replace('_FP','').replace('_PP','')
+        print "channelText:", channelText
         if self.doParamFit:
             for param in xparams+yparams+['integral']:
                 if self.do2D:
@@ -1507,6 +1475,7 @@ class HaaLimits2D(HaaLimits):
                         masses = None,
                         values = fitFuncs[''][param],
                         shifts = {shift: {'up': fitFuncs[shift+'Up'][param], 'down': fitFuncs[shift+'Down'][param],} for shift in shifts},
+                        channel = channelText, 
                     )
                     spline.build(workspace, name)
                     splines[name] = spline
@@ -1521,6 +1490,10 @@ class HaaLimits2D(HaaLimits):
                         #    shifts = {shift: {'up': fitFuncs[shift+'Up'][h][param], 'down': fitFuncs[shift+'Down'][h][param],} for shift in shifts},
                         #)
                         # here is converting to a spline first
+                        #print "fitFuncs:", fitFuncs[''][h][param]
+                        #if 'integral' in name:
+                        #    amasses = self.AMASSES
+                        #    values = [integrals[h][a] for h in Hs for a in As[h]]   
                         spline = Models.Spline(name,
                             MH = 'MA',
                             masses = amasses,
@@ -1530,7 +1503,12 @@ class HaaLimits2D(HaaLimits):
                                     'up'  : self.fitToList(fitFuncs[shift+'Up'][h][param],amasses), 
                                     'down': self.fitToList(fitFuncs[shift+'Down'][h][param],amasses),
                                 } for shift in shifts},
+                            channel = channelText,
                         )
+                        #print "name:", name
+                        #print "amasses:", amasses
+                        #print "fitFunc:", h, param, fitFuncs[''][h][param]
+                        #print "value:", self.fitToList(fitFuncs[''][h][param],amasses)
                         spline.build(workspace, name)
                         splines[name] = spline
 
@@ -1581,6 +1559,7 @@ class HaaLimits2D(HaaLimits):
                         **{self.rstrip(param,'_sigx'): '{param}_{splinename}_{region}'.format(param=param, splinename=self.SPLINENAME.format(h=h), region=region) for param in xparams}
                     )
                     modelx.build(workspace,'{}_{}'.format(self.SPLINENAME.format(h=h),region+'_x'))
+                    #print 'modelx:', '{}_{}'.format(self.SPLINENAME.format(h=h),region+'_x')
 
                     if yFitFunc=='L':
                         modely_gaus = Models.Gaussian("model_gaus",
@@ -1617,6 +1596,7 @@ class HaaLimits2D(HaaLimits):
                 return models
 
         # create parameter splines
+        # if not self.doParamFit
         for param in xparams+yparams:
             if self.do2D:
                 name = '{param}_{region}'.format(param=param,region=region)
@@ -1637,6 +1617,7 @@ class HaaLimits2D(HaaLimits):
                     masses = paramMasses,
                     values = paramValues,
                     shifts = paramShifts,
+                    channel = channelText,
                 )
                 spline.build(workspace, name)
                 splines[name] = spline
@@ -1658,6 +1639,7 @@ class HaaLimits2D(HaaLimits):
                         masses = paramMasses,
                         values = paramValues,
                         shifts = paramShifts,
+                        channel = channelText,
                     )
                     spline.build(workspace, name)
                     splines[name] = spline
@@ -1703,6 +1685,7 @@ class HaaLimits2D(HaaLimits):
                     masses = paramMasses,
                     values = paramValues,
                     shifts = paramShifts,
+                    channel = channelText,
                 )
                 spline.build(workspace, name)
                 splines[name] = spline
@@ -1754,7 +1737,7 @@ class HaaLimits2D(HaaLimits):
                     **{self.rstrip(param,'_sigx'): '{param}_h{h}_{region}'.format(param=param, h=h, region=region) for param in xparams}
                 )
                 modelx.build(workspace,'{}_{}'.format(self.SPLINENAME.format(h=h),region+'_x'))
-
+                
                 if yFitFunc=='L':
                     modely_gaus = Models.Gaussian("model_gaus",
                         x = yVar,
@@ -1784,33 +1767,45 @@ class HaaLimits2D(HaaLimits):
                 )
                 model.build(workspace,'{}_{}'.format(self.SPLINENAME.format(h=h),region))
 
-
                 models[h] = model
 
             return models
 
 
     def addControlModels(self, load=False, skipFit=False):
+        print "Adding control region models..."
         region = 'control'
         workspace = self.buildWorkspace('control')
         self.initializeWorkspace(workspace=workspace)
+        #print workspace.Print("V")
+        
         super(HaaLimits2D, self).buildModel(region=region, workspace=workspace)
+        
         if load:
             vals, errs, ints, interrs = self.loadBackgroundFit(region,workspace=workspace)
         if not skipFit:
             vals, errs, ints, interrs = self.fitBackground(region=region, workspace=workspace)
-        
+            
         if load:
             allintegrals, errors = self.loadComponentIntegrals(region)
         if not skipFit:
-            allintegrals, errors = self.buildComponentIntegrals(region,vals,errs,ints,interrs, workspace.pdf('bg_control'))
+            allintegrals, errors = self.buildComponentIntegrals('',region,vals,errs,ints,interrs, workspace.pdf('bg_control'))
+
+        print workspace.Print("V")
 
         self.control_vals = vals
+        #print "control_vals", vals
         self.control_errs = errs
+        #print "control_errs", errs
         self.control_integrals = ints
+        #print "control_integrals", ints
         self.control_integralerrs = interrs
+        #print "control_integralerrs", interrs
         self.control_integralErrors = errors
+        #print "control_integralErrors", errors
         self.control_integralValues = allintegrals
+        #print "control_integralValues", allintegrals
+        
 
     def plotModelY(self,workspace,yVar,data,model,region,shift='',**kwargs):
         yRange = kwargs.pop('yRange',[])
@@ -1824,10 +1819,10 @@ class HaaLimits2D(HaaLimits):
         if not self.SKIPPLOTS:
             # continuum
             model.plotOn(yFrame,ROOT.RooFit.Components('conty_{}_y'.format(region)),ROOT.RooFit.LineStyle(ROOT.kDashed))
-            model.plotOn(yFrame,ROOT.RooFit.Components('conty1_{}_y'.format(region)),ROOT.RooFit.LineStyle(ROOT.kDashed))
-            model.plotOn(yFrame,ROOT.RooFit.Components('conty2_{}_y'.format(region)),ROOT.RooFit.LineStyle(ROOT.kDashed))
-            model.plotOn(yFrame,ROOT.RooFit.Components('conty3_{}_y'.format(region)),ROOT.RooFit.LineStyle(ROOT.kDashed))
-            model.plotOn(yFrame,ROOT.RooFit.Components('conty4_{}_y'.format(region)),ROOT.RooFit.LineStyle(ROOT.kDashed))
+            #model.plotOn(yFrame,ROOT.RooFit.Components('conty1_{}_y'.format(region)),ROOT.RooFit.LineStyle(ROOT.kDashed))
+            #model.plotOn(yFrame,ROOT.RooFit.Components('conty2_{}_y'.format(region)),ROOT.RooFit.LineStyle(ROOT.kDashed))
+            #model.plotOn(yFrame,ROOT.RooFit.Components('conty3_{}_y'.format(region)),ROOT.RooFit.LineStyle(ROOT.kDashed))
+            #model.plotOn(yFrame,ROOT.RooFit.Components('conty4_{}_y'.format(region)),ROOT.RooFit.LineStyle(ROOT.kDashed))
             # combined model
             model.plotOn(yFrame)
         model.paramOn(yFrame,ROOT.RooFit.Layout(0.72,0.98,0.90))
@@ -1908,17 +1903,21 @@ class HaaLimits2D(HaaLimits):
 
         model = workspace.pdf('bg_{}_xy'.format(region))
         name = 'data_prefit_{}{}'.format(region,'_'+shift if shift else '')
-        hist = self.histMap[region][shift]['dataNoSig']
+        #hist = self.histMap[region][shift]['dataNoSig']
+        hist = self.histMap[region][shift]['datadriven']
+        print hist.get().find('visFourbodyMass').getMax(), hist.get().find('visFourbodyMass').getMin()
         if hist.InheritsFrom('TH1'):
             integral = hist.Integral() * scale # 2D restricted integral?
-            integralerr = getHistogramIntegralError(hist) * scale
+            integralerr = getHistogram2DIntegralError(hist) * scale
             data = ROOT.RooDataHist(name,name,ROOT.RooArgList(workspace.var(xVar),workspace.var(yVar)),hist)
         else:
             data = hist.Clone(name)
             integral = hist.sumEntries('{0}>{2} && {0}<{3} && {1}>{4} && {1}<{5}'.format(xVar,yVar,*self.XRANGE+self.YRANGE)) * scale
             integralerr = getDatasetIntegralError(hist,'{0}>{2} && {0}<{3} && {1}>{4} && {1}<{5}'.format(xVar,yVar,*self.XRANGE+self.YRANGE)) * scale
 
-        fr = model.fitTo(data,ROOT.RooFit.Save(),ROOT.RooFit.SumW2Error(True), ROOT.RooFit.PrintLevel(-1))
+        args = data.get()
+        print "DEBUG!!!", args.find('visFourbodyMass').getMax(), args.find('visFourbodyMass').getMin()
+        fr = model.fitTo(data,ROOT.RooFit.Minimizer("Minuit2"),ROOT.RooFit.Save(),ROOT.RooFit.SumW2Error(True), ROOT.RooFit.PrintLevel(-1))
 
         workspace.var(xVar).setBins(self.XBINNING)
         workspace.var(yVar).setBins(self.YBINNING)
@@ -1957,7 +1956,8 @@ class HaaLimits2D(HaaLimits):
         super(HaaLimits2D, self).buildModel(region=region, workspace=self.workspace, xVar=xVar)
         self.loadBackgroundFit(region, workspace=self.workspace)
 
-        name = 'data_obs_{}'.format(region)
+        #name = 'data_obs_{}'.format(region)
+        name = 'data_obs'
         hist = self.histMap[region]['']['data']
         # use the provided data
         if hist.InheritsFrom('TH1'):
@@ -1973,134 +1973,148 @@ class HaaLimits2D(HaaLimits):
         scale = kwargs.pop('scale',1)
 
         workspace = self.workspace
+        workspace.Print()
+        #print self.REGIONS
 
-        for region in self.REGIONS:
-            xVar = self.XVAR
-            yVar = self.YVAR
-
-            # build the models after doing the prefit stuff
-            prebuiltParams = {p:p for p in self.background_params[region]}
-            self.addVar(xVar, *self.XRANGE, unit='GeV', label=self.XLABEL, workspace=workspace)
-            self.addVar(yVar, *self.YRANGE, unit='GeV', label=self.XLABEL, workspace=workspace)
-            self.buildModel(region=region,workspace=workspace,xVar=xVar,yVar=yVar,**prebuiltParams)
-            self.fixXLambda(workspace=self.workspace)
-            self.fixCorrelation(workspace=self.workspace)
-            self.loadBackgroundFit(region,workspace=workspace)
-
-            x = workspace.var(xVar)
-            x.setBins(self.XBINNING)
-            y = workspace.var(yVar)
-            y.setBins(self.YBINNING)
-
-            # save binned data
-            if doBinned:
-
-                bgs = self.getComponentFractions(workspace.pdf('bg_{}_x'.format(region)))
-
-                for bg in bgs:
-                    bgname = bg.strip('_x') if region in bg else '{}_{}'.format(bg,region)
-                    pdf = workspace.pdf(bg)
-                    integral = workspace.function('integral_{}'.format(bgname))
-
-                    args = ROOT.RooArgSet(x,y)
-                    for shift in ['']+self.BACKGROUNDSHIFTS:
-                        if shift:
-                            s = workspace.var(shift)
-
-                            s.setVal(1)
-                            i = integral.getValV()
-                            dh = pdf.generateBinned(args, i, True)
-                            dh.SetName(bgname+'_binned_{}Up'.format(shift))
-                            self.wsimport(dh)
-
-                            s.setVal(-1)
-                            i = integral.getValV()
-                            dh = pdf.generateBinned(args, i, True)
-                            dh.SetName(bgname+'_binned_{}Down'.format(shift))
-                            self.wsimport(dh)
-
-                            s.setVal(0)
-
-                        else:
-                            i = integral.getValV()
-                            dh = pdf.generateBinned(args, i, True)
-                            dh.SetName(bgname+'_binned')
-                            self.wsimport(dh)
-
-            name = 'data_obs_{}'.format(region)
-            hist = self.histMap[region]['']['data']
-            if blind:
-                # generate a toy data observation from the model
-                model = workspace.pdf('bg_{}_xy'.format(region))
-                h = self.histMap[region]['']['dataNoSig']
-                if h.InheritsFrom('TH1'):
-                    integral = h.Integral() * scale # 2D integral?
+        for channel in self.CHANNELS:
+            for region in self.REGIONS:
+                xVar = self.XVAR
+                yVar = self.YVAR
+    
+                region = channel+'_'+region
+    
+                # build the models after doing the prefit stuff
+                prebuiltParams = {p:p for p in self.background_params[region]}
+                self.addVar(xVar, *self.XRANGE, unit='GeV', label=self.XLABEL, workspace=workspace)
+                self.addVar(yVar, *self.YRANGE, unit='GeV', label=self.YLABEL, workspace=workspace)
+                self.buildModel(region=region,workspace=workspace,xVar=xVar,yVar=yVar,**prebuiltParams)
+                self.fixXLambda(workspace=self.workspace)
+                self.fixCorrelation(workspace=self.workspace)
+                self.loadBackgroundFit(region,workspace=workspace)
+    
+                x = workspace.var(xVar)
+                x.setBins(self.XBINNING)
+                y = workspace.var(yVar)
+                y.setBins(self.YBINNING)
+    
+                # save binned data
+                if doBinned:
+    
+                    bgs = self.getComponentFractions(workspace.pdf('bg_{}_x'.format(region)))
+    
+                    for bg in bgs:
+                        bgname = bg.strip('_x') if region in bg else '{}_{}'.format(bg,region)
+                        pdf = workspace.pdf(bg)
+                        integral = workspace.function('integral_{}'.format(bgname))
+    
+                        args = ROOT.RooArgSet(x,y)
+                        for shift in ['']+self.BACKGROUNDSHIFTS:
+                            if shift:
+                                s = workspace.var(shift)
+                                #print "DEBUG:", shift
+                                s.setVal(1)
+                                i = integral.getValV()
+                                dh = pdf.generateBinned(args, i, True)
+                                dh.SetName(bgname+'_binned_{}Up'.format(shift))
+                                self.wsimport(dh)
+    
+                                s.setVal(-1)
+                                i = integral.getValV()
+                                dh = pdf.generateBinned(args, i, True)
+                                dh.SetName(bgname+'_binned_{}Down'.format(shift))
+                                self.wsimport(dh)
+    
+                                s.setVal(0)
+    
+                            else:
+                                i = integral.getValV()
+                                dh = pdf.generateBinned(args, i, True)
+                                dh.SetName(bgname+'_binned')
+                                self.wsimport(dh)
+    
+                #print "DEBUG!!!", hist, blind
+                name = 'data_obs_{}'.format(region)
+                if blind:
+                    hist = self.histMap[region]['']['datadriven']
                 else:
-                    integral = h.sumEntries('{0}>{2} && {0}<{3} && {1}>{4} && {1}<{5}'.format(xVar,yVar,*self.XRANGE+self.YRANGE)) * scale
-                if asimov:
-                    data_obs = model.generateBinned(ROOT.RooArgSet(self.workspace.var(xVar),self.workspace.var(yVar)),integral,1)
-                else:
-                    data_obs = model.generate(ROOT.RooArgSet(self.workspace.var(xVar),self.workspace.var(yVar)),int(integral))
-                if addSignal:
-                    # TODO, doesn't work with new setup
-                    raise NotImplementedError
-                    logging.info('Generating dataset with signal {}'.format(region))
-                    self.workspace.var('MH').setVal(mh)
-                    self.workspace.var('MA').setVal(ma)
-                    model = self.workspace.pdf('{}_{}'.format(self.SPLINENAME.format(h=mh),region))
-                    integral = self.workspace.function('integral_{}_{}'.format(self.SPLINENAME.format(h=mh),region)).getVal()
-                    if asimov:
-                        sig_obs = model.generate(ROOT.RooArgSet(self.workspace.var(xVar),self.workspace.var(yVar)),integral,1)
-                        data_obs.add(sig_obs)
+                    hist = self.histMap[region]['']['data']
+                if blind:
+                    # generate a toy data observation from the model
+                    model = workspace.pdf('bg_{}_xy'.format(region))
+                    #h = self.histMap[region]['']['dataNoSig']
+                    h = self.histMap[region]['']['datadriven']
+                    if h.InheritsFrom('TH1'):
+                        integral = h.Integral() * scale # 2D integral?
                     else:
-                        sig_obs = model.generate(ROOT.RooArgSet(self.workspace.var(xVar),self.workspace.var(yVar)),int(integral))
-                        data_obs.append(sig_obs)
-                data_obs.SetName(name)
-            else:
-                # use the provided data
-                if hist.InheritsFrom('TH1'):
-                    data_obs = ROOT.RooDataHist(name,name,ROOT.RooArgList(self.workspace.var(xVar),self.workspace.var(yVar)),self.histMap[region]['']['data'])
+                        integral = h.sumEntries('{0}>{2} && {0}<{3} && {1}>{4} && {1}<{5}'.format(xVar,yVar,*self.XRANGE+self.YRANGE)) * scale
+                    if asimov:
+                        data_obs = model.generateBinned(ROOT.RooArgSet(self.workspace.var(xVar),self.workspace.var(yVar)),integral,1)
+                    else:
+                        data_obs = model.generate(ROOT.RooArgSet(self.workspace.var(xVar),self.workspace.var(yVar)),int(integral))
+                    if addSignal:
+                        # TODO, doesn't work with new setup
+                        raise NotImplementedError
+                        logging.info('Generating dataset with signal {}'.format(region))
+                        self.workspace.var('MH').setVal(mh)
+                        self.workspace.var('MA').setVal(ma)
+                        model = self.workspace.pdf('{}_{}'.format(self.SPLINENAME.format(h=mh),region))
+                        integral = self.workspace.function('integral_{}_{}'.format(self.SPLINENAME.format(h=mh),region)).getVal()
+                        if asimov:
+                            sig_obs = model.generate(ROOT.RooArgSet(self.workspace.var(xVar),self.workspace.var(yVar)),integral,1)
+                            data_obs.add(sig_obs)
+                        else:
+                            sig_obs = model.generate(ROOT.RooArgSet(self.workspace.var(xVar),self.workspace.var(yVar)),int(integral))
+                            data_obs.append(sig_obs)
+                    data_obs.SetName(name)
                 else:
-                    data_obs = hist.Clone(name)
-                    data_obs.get().find(xVar).setBins(self.XBINNING)
-                    data_obs.get().find(yVar).setBins(self.YBINNING)
-            self.wsimport(data_obs)
-
-            if hist.InheritsFrom('TH1'):
-                pass
-            else:
-                xFrame = self.workspace.var(xVar).frame()
-                data_obs.plotOn(xFrame)
-                canvas = ROOT.TCanvas('c','c',800,800)
-                xFrame.Draw()
-                mi = xFrame.GetMinimum()
-                ma = xFrame.GetMaximum()
-                if mi<0:
-                    xFrame.SetMinimum(0.1)
-                python_mkdir(self.plotDir)
-                canvas.Print('{}/data_obs_{}_xproj.png'.format(self.plotDir,region))
-                canvas.SetLogy(True)
-                canvas.Print('{}/data_obs_{}_xproj_log.png'.format(self.plotDir,region))
-
-                yFrame = self.workspace.var(yVar).frame()
-                data_obs.plotOn(yFrame)
-                canvas = ROOT.TCanvas('c','c',800,800)
-                yFrame.Draw()
-                mi = yFrame.GetMinimum()
-                ma = yFrame.GetMaximum()
-                if mi<0:
-                    yFrame.SetMinimum(0.1)
-                python_mkdir(self.plotDir)
-                canvas.Print('{}/data_obs_{}_yproj.png'.format(self.plotDir,region))
-                canvas.SetLogy(True)
-                canvas.Print('{}/data_obs_{}_yproj_log.png'.format(self.plotDir,region))
-
-
-
+                    # use the provided data
+                    if hist.InheritsFrom('TH1'):
+                        data_obs = ROOT.RooDataHist(name,name,ROOT.RooArgList(self.workspace.var(xVar),self.workspace.var(yVar)),self.histMap[region]['']['data'])
+                    else:
+                        data_obs = hist.Clone(name)
+                        data_obs.get().find(xVar).setBins(self.XBINNING)
+                        data_obs.get().find(yVar).setBins(self.YBINNING)
+                        #print "data_obs:", data_obs
+                        #data_obs.Print("V")
+                self.wsimport(data_obs)
+    
+                if hist.InheritsFrom('TH1'):
+                    pass
+                else:
+                    xFrame = self.workspace.var(xVar).frame()
+                    data_obs.plotOn(xFrame)
+                    canvas = ROOT.TCanvas('c','c',800,800)
+                    xFrame.Draw()
+                    mi = xFrame.GetMinimum()
+                    ma = xFrame.GetMaximum()
+                    if mi<0:
+                        xFrame.SetMinimum(0.1)
+                    python_mkdir(self.plotDir)
+                    canvas.Print('{}/data_obs_{}_xproj.png'.format(self.plotDir,region))
+                    canvas.SetLogy(True)
+                    canvas.Print('{}/data_obs_{}_xproj_log.png'.format(self.plotDir,region))
+    
+                    yFrame = self.workspace.var(yVar).frame()
+                    #print "YLABEL", self.YLABEL
+                    #data_obs.get().find(yVar).setPlotLabel(self.YLABEL)
+                    data_obs.plotOn(yFrame)
+                    canvas = ROOT.TCanvas('c','c',800,800)
+                    yFrame.Draw()
+                    mi = yFrame.GetMinimum()
+                    ma = yFrame.GetMaximum()
+                    if mi<0:
+                        yFrame.SetMinimum(0.1)
+                    python_mkdir(self.plotDir)
+                    canvas.Print('{}/data_obs_{}_yproj.png'.format(self.plotDir,region))
+                    canvas.SetLogy(True)
+                    canvas.Print('{}/data_obs_{}_yproj_log.png'.format(self.plotDir,region))
+    
+    
         if addControl: #ADDED BY KYLE
             region = 'control'
             xVar = '{}_{}'.format(self.XVAR,region)
-            name = 'data_obs_{}'.format(region)
+            #namehist = 'data_obs_{}'.format(region)
+            name = 'data_obs'
             hist = self.histMap[region]['']['data']
             if hist.InheritsFrom('TH1'):
                 data_obs = ROOT.RooDataHist(name,name,ROOT.RooArgList(self.workspace.var(xVar)),hist)
@@ -2111,6 +2125,7 @@ class HaaLimits2D(HaaLimits):
 
 
     def addBackgroundModels(self, fixAfterControl=False, fixAfterFP=False, load=False, skipFit=False, **kwargs):
+        print "Adding background models..."
         workspace = self.buildWorkspace('bg')
         self.initializeWorkspace(workspace=workspace)
         super(HaaLimits2D, self).buildModel(region='control', workspace=workspace)
@@ -2124,51 +2139,60 @@ class HaaLimits2D(HaaLimits):
         allintegrals = {}
         errors = {}
         allparams = {}
-        for region in self.REGIONS:
-            vals[region] = {}
-            errs[region] = {}
-            integrals[region] = {}
-            integralerrs[region] = {}
-            self.buildModel(region=region, workspace=workspace)
-            self.fixXLambda(workspace=workspace)
-            self.fixCorrelation(workspace=self.workspace)
-            for shift in ['']+self.BACKGROUNDSHIFTS:
-                if shift=='':
-                    if load:
-                        v, e, i, ie = self.loadBackgroundFit(region, workspace=workspace)
+        for channel in self.CHANNELS:
+            for region in self.REGIONS:
+                region=channel+'_'+region
+                vals[region] = {}
+                errs[region] = {}
+                integrals[region] = {}
+                integralerrs[region] = {}
+                self.buildModel(region=region,workspace=workspace)
+                self.fixXLambda(workspace=workspace)
+                self.fixCorrelation(workspace=self.workspace)
+                print "BACKGROUNDSHIFTS:",self.BACKGROUNDSHIFTS
+                for shift in ['']+self.BACKGROUNDSHIFTS:
+                    if shift=='':
+                        if load:
+                            v, e, i, ie = self.loadBackgroundFit(region, workspace=workspace)
+                        else:
+                            v, e, i, ie = self.fitBackground(region=region, workspace=workspace, **kwargs)
+                        vals[region][shift] = v
+                        errs[region][shift] = e
+                        integrals[region][shift] = i
+                        integralerrs[region][shift] = ie
                     else:
-                        v, e, i, ie = self.fitBackground(region=region, workspace=workspace, **kwargs)
-                    vals[region][shift] = v
-                    errs[region][shift] = e
-                    integrals[region][shift] = i
-                    integralerrs[region][shift] = ie
-                else:
-                    if load:
-                        vUp, eUp, iUp, ieUp = self.loadBackgroundFit(region,shift+'Up', workspace=workspace)
-                        vDown, eDown, iDown, ieDown = self.loadBackgroundFit(region,shift+'Down', workspace=workspace)
-                    if not skipFit:
-                        vUp, eUp, iUp, ieUp = self.fitBackground(region=region, shift=shift+'Up', workspace=workspace, **kwargs)
-                        vDown, eDown, iDown, ieDown = self.fitBackground(region=region, shift=shift+'Down', workspace=workspace, **kwargs)
-                    vals[region][shift+'Up'] = vUp
-                    errs[region][shift+'Up'] = eUp
-                    integrals[region][shift+'Up'] = iUp
-                    integralerrs[region][shift+'Up'] = ieUp
-                    vals[region][shift+'Down'] = vDown
-                    errs[region][shift+'Down'] = eDown
-                    integrals[region][shift+'Down'] = iDown
-                    integralerrs[region][shift+'Down'] = ieDown
+                        if load:
+                            vUp, eUp, iUp, ieUp = self.loadBackgroundFit(region,shift+'Up', workspace=workspace)
+                            vDown, eDown, iDown, ieDown = self.loadBackgroundFit(region,shift+'Down', workspace=workspace)
+                        if not skipFit:
+                            vUp, eUp, iUp, ieUp = self.fitBackground(region=region, shift=shift+'Up', workspace=workspace, **kwargs)
+                            vDown, eDown, iDown, ieDown = self.fitBackground(region=region, shift=shift+'Down', workspace=workspace, **kwargs)
+                        vals[region][shift+'Up'] = vUp
+                        errs[region][shift+'Up'] = eUp
+                        integrals[region][shift+'Up'] = iUp
+                        integralerrs[region][shift+'Up'] = ieUp
+                        vals[region][shift+'Down'] = vDown
+                        errs[region][shift+'Down'] = eDown
+                        integrals[region][shift+'Down'] = iDown
+                        integralerrs[region][shift+'Down'] = ieDown
 
-        for region in reversed(self.REGIONS):
-            if load:
-                allintegrals[region], errors[region] = self.loadComponentIntegrals(region)
-            if not skipFit:
-                allparams[region] = self.buildParams(region,vals,errs,integrals,integralerrs)
-                allintegrals[region], errors[region] = self.buildComponentIntegrals(region,vals,errs,integrals,integralerrs, workspace.pdf('bg_{}_x'.format(region)))
+        #print workspace.Print("V")
+        
+        for channel in self.CHANNELS:
+            for region in reversed(self.REGIONS):
+                region=channel+'_'+region
+                if load:
+                    allintegrals[region], errors[region] = self.loadComponentIntegrals(region)
+                if not skipFit:
+                    allparams[region] = self.buildParams(channel,region,vals,errs,integrals,integralerrs)
+                    allintegrals[region], errors[region] = self.buildComponentIntegrals(channel,region,vals,errs,integrals,integralerrs, workspace.pdf('bg_{}_x'.format(region)))
 
         if fixAfterControl:
             self.fix(False, workspace=workspace)
         self.background_values = vals
+        #print "background_values:", vals
         self.background_errors = errs
+        #print "background_errs:", errs
         self.background_integrals = integrals
         self.background_integralerrs = integralerrs
         self.background_integralErrors = errors
@@ -2182,145 +2206,162 @@ class HaaLimits2D(HaaLimits):
         integrals = {}
         integralerrs = {}
         fitFuncs = {}
-        for region in self.REGIONS:
-            models[region] = {}
-            values[region] = {}
-            errors[region] = {}
-            integrals[region] = {}
-            integralerrs[region] = {}
-            fitFuncs[region] = {}
-            if 'PP' in region:  yFitFunc=yFitFuncPP
-            else: yFitFunc = yFitFuncFP
-            for shift in ['']+self.SIGNALSHIFTS+self.QCDSHIFTS:
-                if shift == '':
-                    vals, errs, ints, interrs, fits = self.fitSignals(region=region,shift=shift,yFitFunc=yFitFunc,isKinFit=isKinFit,**kwargs)
-                    values[region][shift] = vals
-                    errors[region][shift] = errs
-                    integrals[region][shift] = ints
-                    integralerrs[region][shift] = interrs
-                    fitFuncs[region][shift] = fits
-                elif shift in self.QCDSHIFTS:
-                    vals, errs, ints, interrs, fits = self.fitSignals(region=region,shift=shift,yFitFunc=yFitFunc,isKinFit=isKinFit,**kwargs)
-                    values[region][shift] = vals
-                    errors[region][shift] = errs
-                    integrals[region][shift] = ints
-                    integralerrs[region][shift] = interrs
-                    fitFuncs[region][shift] = fits
+        for channel in self.CHANNELS:
+            for region in self.REGIONS:
+                region = channel+'_'+region
+                models[region] = {}
+                values[region] = {}
+                errors[region] = {}
+                integrals[region] = {}
+                integralerrs[region] = {}
+                fitFuncs[region] = {}
+                if 'PP' in region:  yFitFunc=yFitFuncPP
+                else: yFitFunc = yFitFuncFP
+                for shift in ['']+self.SIGNALSHIFTS+self.QCDSHIFTS:
+                    if shift == '':
+                        #print self.histMap
+                        vals, errs, ints, interrs, fits = self.fitSignals(region=region,shift=shift,yFitFunc=yFitFunc,isKinFit=isKinFit,**kwargs)
+                        values[region][shift] = vals
+                        errors[region][shift] = errs
+                        integrals[region][shift] = ints
+                        integralerrs[region][shift] = interrs
+                        fitFuncs[region][shift] = fits
+                    elif shift in self.QCDSHIFTS:
+                        vals, errs, ints, interrs, fits = self.fitSignals(region=region,shift=shift,yFitFunc=yFitFunc,isKinFit=isKinFit,**kwargs)
+                        values[region][shift] = vals
+                        errors[region][shift] = errs
+                        integrals[region][shift] = ints
+                        integralerrs[region][shift] = interrs
+                        fitFuncs[region][shift] = fits
+                    else:
+                        valsUp, errsUp, intsUp, interrsUp, fitsUp = self.fitSignals(region=region,shift=shift+'Up',yFitFunc=yFitFunc,isKinFit=isKinFit,**kwargs)
+                        valsDown, errsDown, intsDown, interrsDown, fitsDown = self.fitSignals(region=region,shift=shift+'Down',yFitFunc=yFitFunc,isKinFit=isKinFit,**kwargs)
+                        values[region][shift+'Up'] = valsUp
+                        errors[region][shift+'Up'] = errsUp
+                        integrals[region][shift+'Up'] = intsUp
+                        integralerrs[region][shift+'Up'] = interrsUp
+                        fitFuncs[region][shift+'Up'] = fitsUp
+                        values[region][shift+'Down'] = valsDown
+                        errors[region][shift+'Down'] = errsDown
+                        integrals[region][shift+'Down'] = intsDown
+                        integralerrs[region][shift+'Down'] = interrsDown
+                        fitFuncs[region][shift+'Down'] = fitsDown
+                if self.QCDSHIFTS:
+                    values[region]['QCDscale_ggHUp']      = {}
+                    values[region]['QCDscale_ggHDown']    = {}
+                    errors[region]['QCDscale_ggHUp']      = {}
+                    errors[region]['QCDscale_ggHDown']    = {}
+                    integrals[region]['QCDscale_ggHUp']   = {}
+                    integrals[region]['QCDscale_ggHDown'] = {}
+                    integralerrs[region]['QCDscale_ggHUp']   = {}
+                    integralerrs[region]['QCDscale_ggHDown'] = {}
+                    fitFuncs[region]['QCDscale_ggHUp']    = {}
+                    fitFuncs[region]['QCDscale_ggHDown']  = {}
+                    for h in values[region]['']:
+                        values[region]['QCDscale_ggHUp'][h]      = {}
+                        values[region]['QCDscale_ggHDown'][h]    = {}
+                        errors[region]['QCDscale_ggHUp'][h]      = {}
+                        errors[region]['QCDscale_ggHDown'][h]    = {}
+                        integrals[region]['QCDscale_ggHUp'][h]   = {}
+                        integrals[region]['QCDscale_ggHDown'][h] = {}
+                        integralerrs[region]['QCDscale_ggHUp'][h]   = {}
+                        integralerrs[region]['QCDscale_ggHDown'][h] = {}
+                        fitFuncs[region]['QCDscale_ggHUp'][h]    = {}
+                        fitFuncs[region]['QCDscale_ggHDown'][h]  = {}
+                        for a in values[region][''][h]:
+                            values[region]['QCDscale_ggHUp'][h][a]      = {}
+                            values[region]['QCDscale_ggHDown'][h][a]    = {}
+                            errors[region]['QCDscale_ggHUp'][h][a]      = {}
+                            errors[region]['QCDscale_ggHDown'][h][a]    = {}
+                            integrals[region]['QCDscale_ggHUp'  ][h][a] = max([integrals[region][shift][h][a] for shift in self.QCDSHIFTS])
+                            integrals[region]['QCDscale_ggHDown'][h][a] = min([integrals[region][shift][h][a] for shift in self.QCDSHIFTS])
+                            integralerrs[region]['QCDscale_ggHUp'  ][h][a] = max([integralerrs[region][shift][h][a] for shift in self.QCDSHIFTS])
+                            integralerrs[region]['QCDscale_ggHDown'][h][a] = min([integralerrs[region][shift][h][a] for shift in self.QCDSHIFTS])
+                            for val in values[region][''][h][a]:
+                                values[region]['QCDscale_ggHUp'  ][h][a][val] = max([values[region][shift][h][a][val] for shift in self.QCDSHIFTS])
+                                values[region]['QCDscale_ggHDown'][h][a][val] = min([values[region][shift][h][a][val] for shift in self.QCDSHIFTS])
+                                errors[region]['QCDscale_ggHUp'  ][h][a][val] = max([errors[region][shift][h][a][val] for shift in self.QCDSHIFTS])
+                                errors[region]['QCDscale_ggHDown'][h][a][val] = min([errors[region][shift][h][a][val] for shift in self.QCDSHIFTS])
+                    for shift in ['QCDscale_ggHUp','QCDscale_ggHDown']:
+                        savedir = '{}/{}'.format(self.fitsDir,shift)
+                        python_mkdir(savedir)
+                        savename = '{}/{}_{}.json'.format(savedir,region,shift)
+                        jsonData = {'vals': values[region][shift], 'errs': errors[region][shift], 'integrals': integrals[region][shift], 'integralerrs': integralerrs[region][shift]}
+                        self.dump(savename,jsonData)
+                    fitFuncs[region]['QCDscale_ggHUp']   = self.fitSignalParams(values[region]['QCDscale_ggHUp'],  errors[region]['QCDscale_ggHUp'],  integrals[region]['QCDscale_ggHUp'],  integralerrs[region]['QCDscale_ggHUp'],  region,'QCDscale_ggHUp',yFitFunc=yFitFunc)
+                    fitFuncs[region]['QCDscale_ggHDown'] = self.fitSignalParams(values[region]['QCDscale_ggHDown'],errors[region]['QCDscale_ggHDown'],integrals[region]['QCDscale_ggHDown'],integralerrs[region]['QCDscale_ggHDown'],region,'QCDscale_ggHDown',yFitFunc=yFitFunc)
+                if self.QCDSHIFTS:
+                    models[region] = self.buildSpline(values[region],errors[region],integrals[region],integralerrs[region],region,self.SIGNALSHIFTS+['QCDscale_ggH'],yFitFunc=yFitFunc,isKinFit=isKinFit,fitFuncs=fitFuncs[region],**kwargs)
                 else:
-                    valsUp, errsUp, intsUp, interrsUp, fitsUp = self.fitSignals(region=region,shift=shift+'Up',yFitFunc=yFitFunc,isKinFit=isKinFit,**kwargs)
-                    valsDown, errsDown, intsDown, interrsDown, fitsDown = self.fitSignals(region=region,shift=shift+'Down',yFitFunc=yFitFunc,isKinFit=isKinFit,**kwargs)
-                    values[region][shift+'Up'] = valsUp
-                    errors[region][shift+'Up'] = errsUp
-                    integrals[region][shift+'Up'] = intsUp
-                    integralerrs[region][shift+'Up'] = interrsUp
-                    fitFuncs[region][shift+'Up'] = fitsUp
-                    values[region][shift+'Down'] = valsDown
-                    errors[region][shift+'Down'] = errsDown
-                    integrals[region][shift+'Down'] = intsDown
-                    integralerrs[region][shift+'Down'] = interrsDown
-                    fitFuncs[region][shift+'Down'] = fitsDown
-            if self.QCDSHIFTS:
-                values[region]['QCDscale_ggHUp']      = {}
-                values[region]['QCDscale_ggHDown']    = {}
-                errors[region]['QCDscale_ggHUp']      = {}
-                errors[region]['QCDscale_ggHDown']    = {}
-                integrals[region]['QCDscale_ggHUp']   = {}
-                integrals[region]['QCDscale_ggHDown'] = {}
-                integralerrs[region]['QCDscale_ggHUp']   = {}
-                integralerrs[region]['QCDscale_ggHDown'] = {}
-                fitFuncs[region]['QCDscale_ggHUp']    = {}
-                fitFuncs[region]['QCDscale_ggHDown']  = {}
-                for h in values[region]['']:
-                    values[region]['QCDscale_ggHUp'][h]      = {}
-                    values[region]['QCDscale_ggHDown'][h]    = {}
-                    errors[region]['QCDscale_ggHUp'][h]      = {}
-                    errors[region]['QCDscale_ggHDown'][h]    = {}
-                    integrals[region]['QCDscale_ggHUp'][h]   = {}
-                    integrals[region]['QCDscale_ggHDown'][h] = {}
-                    integralerrs[region]['QCDscale_ggHUp'][h]   = {}
-                    integralerrs[region]['QCDscale_ggHDown'][h] = {}
-                    fitFuncs[region]['QCDscale_ggHUp'][h]    = {}
-                    fitFuncs[region]['QCDscale_ggHDown'][h]  = {}
-                    for a in values[region][''][h]:
-                        values[region]['QCDscale_ggHUp'][h][a]      = {}
-                        values[region]['QCDscale_ggHDown'][h][a]    = {}
-                        errors[region]['QCDscale_ggHUp'][h][a]      = {}
-                        errors[region]['QCDscale_ggHDown'][h][a]    = {}
-                        integrals[region]['QCDscale_ggHUp'  ][h][a] = max([integrals[region][shift][h][a] for shift in self.QCDSHIFTS])
-                        integrals[region]['QCDscale_ggHDown'][h][a] = min([integrals[region][shift][h][a] for shift in self.QCDSHIFTS])
-                        integralerrs[region]['QCDscale_ggHUp'  ][h][a] = max([integralerrs[region][shift][h][a] for shift in self.QCDSHIFTS])
-                        integralerrs[region]['QCDscale_ggHDown'][h][a] = min([integralerrs[region][shift][h][a] for shift in self.QCDSHIFTS])
-                        for val in values[region][''][h][a]:
-                            values[region]['QCDscale_ggHUp'  ][h][a][val] = max([values[region][shift][h][a][val] for shift in self.QCDSHIFTS])
-                            values[region]['QCDscale_ggHDown'][h][a][val] = min([values[region][shift][h][a][val] for shift in self.QCDSHIFTS])
-                            errors[region]['QCDscale_ggHUp'  ][h][a][val] = max([errors[region][shift][h][a][val] for shift in self.QCDSHIFTS])
-                            errors[region]['QCDscale_ggHDown'][h][a][val] = min([errors[region][shift][h][a][val] for shift in self.QCDSHIFTS])
-                for shift in ['QCDscale_ggHUp','QCDscale_ggHDown']:
-                    savedir = '{}/{}'.format(self.fitsDir,shift)
-                    python_mkdir(savedir)
-                    savename = '{}/{}_{}.json'.format(savedir,region,shift)
-                    jsonData = {'vals': values[region][shift], 'errs': errors[region][shift], 'integrals': integrals[region][shift], 'integralerrs': integralerrs[region][shift]}
-                    self.dump(savename,jsonData)
-                fitFuncs[region]['QCDscale_ggHUp']   = self.fitSignalParams(values[region]['QCDscale_ggHUp'],  errors[region]['QCDscale_ggHUp'],  integrals[region]['QCDscale_ggHUp'],  integralerrs[region]['QCDscale_ggHUp'],  region,'QCDscale_ggHUp',yFitFunc=yFitFunc)
-                fitFuncs[region]['QCDscale_ggHDown'] = self.fitSignalParams(values[region]['QCDscale_ggHDown'],errors[region]['QCDscale_ggHDown'],integrals[region]['QCDscale_ggHDown'],integralerrs[region]['QCDscale_ggHDown'],region,'QCDscale_ggHDown',yFitFunc=yFitFunc)
-            if self.QCDSHIFTS:
-                models[region] = self.buildSpline(values[region],errors[region],integrals[region],integralerrs[region],region,self.SIGNALSHIFTS+['QCDscale_ggH'],yFitFunc=yFitFunc,isKinFit=isKinFit,fitFuncs=fitFuncs[region],**kwargs)
-            else:
-                models[region] = self.buildSpline(values[region],errors[region],integrals[region],integralerrs[region],region,self.SIGNALSHIFTS,yFitFunc=yFitFunc,isKinFit=isKinFit,fitFuncs=fitFuncs[region],**kwargs)
+                    models[region] = self.buildSpline(values[region],errors[region],integrals[region],integralerrs[region],region,self.SIGNALSHIFTS,yFitFunc=yFitFunc,isKinFit=isKinFit,fitFuncs=fitFuncs[region],**kwargs)
         self.fitted_models = models
 
     ######################
     ### Setup datacard ###
     ######################
     def setupDatacard(self, addControl=False, doBinned=False):
-        bgs = self.getComponentFractions(self.workspace.pdf('bg_{}_x'.format(self.REGIONS[0])))
+
+        print "Setting up datacard..."
+        #for channel in self.CHANNELS:
+        bgs = self.getComponentFractions(self.workspace.pdf('bg_{}_x'.format(self.CHANNELS[0]+'_'+self.REGIONS[0])))
+            #bgs_tmp = [self.getComponentFractions(self.workspace.pdf('bg_{}_x'.format(c+'_'+self.REGIONS[0])))for c in self.CHANNELS]
+            #bgs=bgs_tmp[0]
+            #while len(bgs_tmp) > 1:
+            #    bgs.update(bgs_tmp[1])
+            #    bgs_tmp.pop(1)
+            #print "bgs:", bgs
         bgs = [self.rstrip(b,'_x') for b in bgs]
         bgs = [self.rstrip(b,'_'+self.REGIONS[0]) for b in bgs]
+        bgs = [self.rstrip(b,'_'+self.CHANNELS[0]) for b in bgs]
         sigs = [self.SPLINENAME.format(h=h) for h in self.HMASSES]
         self.bgs = bgs
         self.sigs = sigs
 
-        # setup bins
-        for region in self.REGIONS:
-            self.addBin(region)
+        self.setChannels(self.CHANNELS)
+
+        for channel in self.CHANNELS:
+            # setup bins
+            for region in self.REGIONS:
+                region = channel+'_'+region
+                self.addBin(region)
+                print "Adding bin", region
 
         # add processes
         for proc in bgs:
+            #if proc.split('_')[1] == region.split('_')[0]:
             self.addProcess(proc)
+            print "Adding process", proc
 
         for proc in sigs:
+            #proc = proc+'_'+channel
             self.addProcess(proc,signal=True)
-
-        #if doBinned: self.addBackgroundHists()
-
-        for region in self.REGIONS:
-            for proc in sigs+bgs:
-                if proc in bgs and doBinned: 
-                    self.setExpected(proc,region,-1)
-                    self.addShape(region,proc,'{}_{}_binned'.format(proc,region))
-                    continue
-                self.setExpected(proc,region,1)
-                if proc not in sigs:
-                    self.addRateParam('integral_{}_{}'.format(proc,region),region,proc)
-                #if proc in sigs:
-                #    self.setExpected(proc,region,1)
-                #    self.addRateParam('integral_{}_{}'.format(proc,region),region,proc)
-                #else:
-                #    key = proc if proc in self.background_integralValues[region] else '{}_{}'.format(proc,region)
-                #    integral = self.background_integralValues[region][key]
-                #    self.setExpected(proc,region,integral)
-                # overrides shape name to constrain them between regions
-                #if 'cont' not in proc and proc not in sigs:
-                #    self.addShape(region,proc,proc)
-                if proc not in sigs:
-                    self.addShape(region,proc,'{}_{}_xy'.format(proc,region))
-                
-            self.setObserved(region,-1) # reads from histogram
+            print "Adding process", proc
+    
+        for channel in self.CHANNELS:
+            for region in self.REGIONS:
+                for proc in sigs+bgs:
+                    regionText = channel+'_'+region
+                    proc = proc+'_'+regionText
+                    #print regionText, proc, region
+                    #print regionText, proc
+                    #if not 'haa' in proc or not regionText.split('_')[1] == proc.split('_')[0]: continue
+                    self.setExpected(proc,regionText,1)
+                    if proc not in sigs:
+                        if not 'haa' in proc: 
+                            self.addRateParam('integral_{}'.format(proc),regionText,proc)
+                    if 'haa' in proc:
+                        print "Adding shape", regionText,proc,'{}'.format(proc)
+                        self.addShape(regionText,proc,'{}'.format(proc))
+                    else:
+                        print "Adding shape", regionText,proc,'{}_xy'.format(proc)
+                        self.addShape(regionText,proc,'{}_xy'.format(proc))
+                self.setObserved(regionText,-1) # reads from histogram
 
         self.addCrossSection()
-
+        
         if addControl:
             region = 'control'
+            print "Adding control", addControl
 
             self.addBin(region)
 
@@ -2328,8 +2369,10 @@ class HaaLimits2D(HaaLimits):
                 #key = proc if proc in self.control_integralValues else '{}_{}'.format(proc,region)
                 #integral = self.control_integralValues[key]
                 #self.setExpected(proc,region,integral)
-                self.setExpected(proc,region,1)
-                self.addRateParam('integral_{}_{}'.format(proc,region),region,proc)
+                #proc = proc.split('_')[0]
+                #print "DEBUG0:", proc, region
+                self.setExpected(proc+'_control',region,1)
+                self.addRateParam('integral_{}_{}'.format(proc,region),region,proc+'_control')
                 #if 'cont' not in proc and proc not in sigs:
                 #    self.addShape(region,proc,proc)
                 #if 'cont' in proc:
@@ -2388,9 +2431,10 @@ class HaaLimits2D(HaaLimits):
               "h750a17" : { "mean_ttgaus": 10.1, "sigma_ttgaus": 2.98, "mu_ttland": 2.30, "sigma_ttland": 0.63},
               "h750a19" : { "mean_ttgaus": 11.2, "sigma_ttgaus": 3.25, "mu_ttland": 2.39, "sigma_ttland": 0.67},
               "h750a21" : { "mean_ttgaus": 12.4, "sigma_ttgaus": 3.69, "mu_ttland": 2.70, "sigma_ttland": 0.83},
-              "h1000a5" : { "mean_ttgaus": 8.90, "sigma_ttgaus": 2.80, "mu_ttland": 2.20, "sigma_ttland": 0.60},
-              "h1000a9" : { "mean_ttgaus": 8.90, "sigma_ttgaus": 2.80, "mu_ttland": 2.20, "sigma_ttland": 0.60},
-              "h1000a15": { "mean_ttgaus": 8.90, "sigma_ttgaus": 2.80, "mu_ttland": 2.20, "sigma_ttland": 0.60},
+              "h1000a10" : { "mean_ttgaus": 8.90, "sigma_ttgaus": 2.80, "mu_ttland": 2.20, "sigma_ttland": 0.60},
+              "h1000a20" : { "mean_ttgaus": 8.90, "sigma_ttgaus": 2.80, "mu_ttland": 2.20, "sigma_ttland": 0.60},
+              "h1000a30": { "mean_ttgaus": 8.90, "sigma_ttgaus": 2.80, "mu_ttland": 2.20, "sigma_ttland": 0.60},
+              "h1000a40": { "mean_ttgaus": 8.90, "sigma_ttgaus": 2.80, "mu_ttland": 2.20, "sigma_ttland": 0.60},
             }
         else:
             initialValues = {
@@ -2442,9 +2486,10 @@ class HaaLimits2D(HaaLimits):
               "h750a17" : { "mean_sigy": 7.10, "sigma_sigy": 3.10, "width_sigy": 0.80},
               "h750a19" : { "mean_sigy": 8.00, "sigma_sigy": 3.50, "width_sigy": 0.50},
               "h750a21" : { "mean_sigy": 8.80, "sigma_sigy": 4.00, "width_sigy": 0.80},
-              "h1000a5" : { "mean_sigy": 2.10, "sigma_sigy": 0.50, "width_sigy": 0.80},
-              "h1000a9" : { "mean_sigy": 2.10, "sigma_sigy": 0.50, "width_sigy": 0.80},
-              "h1000a15": { "mean_sigy": 2.10, "sigma_sigy": 0.50, "width_sigy": 0.80},
+              "h1000a10" : { "mean_sigy": 2.10, "sigma_sigy": 0.50, "width_sigy": 0.80},
+              "h1000a20" : { "mean_sigy": 2.10, "sigma_sigy": 0.50, "width_sigy": 0.80},
+              "h1000a30": { "mean_sigy": 2.10, "sigma_sigy": 0.50, "width_sigy": 0.80},
+              "h1000a40": { "mean_sigy": 2.10, "sigma_sigy": 0.50, "width_sigy": 0.80},
             }
         return initialValues
 
@@ -2452,24 +2497,24 @@ class HaaLimits2D(HaaLimits):
     def GetInitialValuesDCB(self, isKinFit=False):
         if isKinFit:
             initialValues = {
-              "h125a3p6": { "a1": 6.0, "a2": 1.22, "n1": 5.9, "n2": 9.0, "sigma": 16.22},
-              "h125a4"  : { "a1": 5.4, "a2": 0.99, "n1": 5.9, "n2": 9.0, "sigma": 14.78},
-              "h125a5"  : { "a1": 5.0, "a2": 0.92, "n1": 6.0, "n2": 9.0, "sigma": 14.02},
-              "h125a6"  : { "a1": 5.0, "a2": 1.10, "n1": 5.4, "n2": 9.4, "sigma": 14.18},
-              "h125a7"  : { "a1": 5.0, "a2": 1.69, "n1": 3.9, "n2": 3.7, "sigma": 14.29},
-              "h125a8"  : { "a1": 5.1, "a2": 1.65, "n1": 3.5, "n2": 3.6, "sigma": 14.19},#Rough
-              "h125a9"  : { "a1": 5.2, "a2": 1.07, "n1": 2.8, "n2": 9.0, "sigma": 10.58},
-              "h125a10" : { "a1": 5.1, "a2": 1.17, "n1": 2.9, "n2": 9.2, "sigma": 10.48},#Rough
-              "h125a11" : { "a1": 1.8, "a2": 1.55, "n1": 6.0, "n2": 4.1, "sigma": 9.770},
-              "h125a12" : { "a1": 1.9, "a2": 1.65, "n1": 6.0, "n2": 4.2, "sigma": 9.980},#Rough
-              "h125a13" : { "a1": 2.0, "a2": 2.66, "n1": 6.0, "n2": 1.4, "sigma": 10.04},
-              "h125a14" : { "a1": 2.0, "a2": 2.77, "n1": 6.0, "n2": 1.5, "sigma": 10.14},#Rough
-              "h125a15" : { "a1": 1.3, "a2": 2.19, "n1": 6.0, "n2": 1.9, "sigma": 7.840},
-              "h125a17" : { "a1": 1.5, "a2": 2.08, "n1": 6.0, "n2": 1.8, "sigma": 6.990},
-              "h125a18" : { "a1": 1.5, "a2": 2.06, "n1": 6.0, "n2": 1.8, "sigma": 6.770},#Rough
-              "h125a19" : { "a1": 1.6, "a2": 3.34, "n1": 6.0, "n2": 0.6, "sigma": 6.220},
-              "h125a20" : { "a1": 1.6, "a2": 3.24, "n1": 6.0, "n2": 0.7, "sigma": 6.320},#Rough
-              "h125a21" : { "a1": 1.2, "a2": 1.78, "n1": 6.0, "n2": 2.0, "sigma": 5.339},
+              "h125a3p6": { "a1": 6.0, "a2": 1.22, "n1": 5.9, "n2": 9.0, "sigma": 16.22, "mean": 93},
+              "h125a4"  : { "a1": 1.0, "a2": 2.20, "n1": 125, "n2": 0.01, "sigma": 18.45, "mean": 105},
+              "h125a5"  : { "a1": 1.0, "a2": 3.00, "n1": 125, "n2": 0.1, "sigma": 18.45, "mean": 105},
+              "h125a6"  : { "a1": 5.0, "a2": 1.10, "n1": 5.4, "n2": 9.4, "sigma": 14.18, "mean": 93},
+              "h125a7"  : { "a1": 5.0, "a2": 1.69, "n1": 3.9, "n2": 3.7, "sigma": 14.29, "mean": 93},
+              "h125a8"  : { "a1": 5.1, "a2": 1.65, "n1": 3.5, "n2": 3.6, "sigma": 14.19, "mean": 93},#Rough
+              "h125a9"  : { "a1": 5.2, "a2": 1.07, "n1": 2.8, "n2": 9.0, "sigma": 10.58, "mean": 93},
+              "h125a10" : { "a1": 5.1, "a2": 1.17, "n1": 2.9, "n2": 9.2, "sigma": 10.48, "mean": 93},#Rough
+              "h125a11" : { "a1": 1.8, "a2": 1.55, "n1": 6.0, "n2": 4.1, "sigma": 9.770, "mean": 93},
+              "h125a12" : { "a1": 1.9, "a2": 1.65, "n1": 6.0, "n2": 4.2, "sigma": 9.980, "mean": 93},#Rough
+              "h125a13" : { "a1": 2.0, "a2": 2.66, "n1": 6.0, "n2": 1.4, "sigma": 10.04, "mean": 93},
+              "h125a14" : { "a1": 2.0, "a2": 2.77, "n1": 6.0, "n2": 1.5, "sigma": 10.14, "mean": 93},#Rough
+              "h125a15" : { "a1": 1.3, "a2": 2.19, "n1": 6.0, "n2": 1.9, "sigma": 7.840, "mean": 93},
+              "h125a17" : { "a1": 1.5, "a2": 2.08, "n1": 6.0, "n2": 1.8, "sigma": 6.990, "mean": 93},
+              "h125a18" : { "a1": 7.5, "a2": 0.90, "n1": 0.001, "n2": 125, "sigma": 17, "mean": 93},#Rough
+              "h125a19" : { "a1": 1.6, "a2": 3.34, "n1": 6.0, "n2": 0.6, "sigma": 6.220, "mean": 93},
+              "h125a20" : { "a1": 1.6, "a2": 3.24, "n1": 6.0, "n2": 0.7, "sigma": 6.320, "mean": 93},#Rough
+              "h125a21" : { "a1": 1.2, "a2": 1.78, "n1": 6.0, "n2": 2.0, "sigma": 5.339, "mean": 93},
               "125" : {"a1" : 5.0, "a2": 1.5, "n1": 6.0, "n2": 1.5, "sigma": 10.0},
               "h300a5"  : { "a1": 2.5, "a2": 1.28, "n1": 6.0, "n2": 8.6, "sigma": 37.95},
               "h300a7"  : { "a1": 2.6, "a2": 1.19, "n1": 3.1, "n2": 9.0, "sigma": 35.05},
@@ -2494,24 +2539,24 @@ class HaaLimits2D(HaaLimits):
             }
         else:
             initialValues = {
-              "h125a3p6": { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 12.0},
-              "h125a4"  : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 12.5},
-              "h125a5"  : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 13.5},
-              "h125a6"  : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0},
-              "h125a7"  : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0},
-              "h125a8"  : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0},#Rough
-              "h125a9"  : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0},
-              "h125a10" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0},#Rough
-              "h125a11" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0},
-              "h125a12" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0},#Rough
-              "h125a13" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0},
-              "h125a14" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0},#Rough
-              "h125a15" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0},
-              "h125a17" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0},
-              "h125a18" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0},#Rough
-              "h125a19" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0},
-              "h125a20" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0},#Rough
-              "h125a21" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0},
+              "h125a3p6": { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 12.0, "mean": 90},
+              "h125a4"  : { "a1": 0.5, "a2": 1.5, "n1": 125., "n2": 0.01, "sigma": 20.8, "mean": 106.9},
+              "h125a5"  : { "a1": 0.6, "a2": 1.6, "n1": 125., "n2": 10, "sigma": 20.8, "mean": 106.9},
+              "h125a6"  : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0, "mean": 90},
+              "h125a7"  : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0, "mean": 90},
+              "h125a8"  : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0, "mean": 90},#Rough
+              "h125a9"  : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0, "mean": 90},
+              "h125a10" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0, "mean": 90},#Rough
+              "h125a11" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0, "mean": 90},
+              "h125a12" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0, "mean": 90},#Rough
+              "h125a13" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0, "mean": 90},
+              "h125a14" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0, "mean": 90},#Rough
+              "h125a15" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0, "mean": 90},
+              "h125a17" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0, "mean": 90},
+              "h125a18" : { "a1": 4.0, "a2": 0.5, "n1": 0.001, "n2": 125, "sigma": 18.0, "mean": 90},#Rough
+              "h125a19" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0, "mean": 90},
+              "h125a20" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0, "mean": 90},#Rough
+              "h125a21" : { "a1": 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0, "mean": 90},
               "125" : {"a1" : 3.5, "a2": 3.5, "n1": 18.0, "n2": 1.3, "sigma": 14.0},
               "h300a5"  : { "a1": 3.5, "a2": 3.5, "n1": 17.0, "n2": 5.0, "sigma": 35.0},
               "h300a7"  : { "a1": 3.5, "a2": 3.5, "n1": 17.0, "n2": 5.0, "sigma": 36.0},
@@ -2653,24 +2698,25 @@ class HaaLimits2D(HaaLimits):
     def GetInitialValuesDG(self, region="FP"):
         if 'PP' in region: 
             initialValues = {
-                "h125a3p6": { "mean": 93.5, "sigma1": 14.2, "sigma2": 10.1},
-                "h125a4"  : { "mean": 90.1, "sigma1": 15.1, "sigma2": 10.1}, #89.5 15.6 12.5 2.07
-                "h125a5"  : { "mean": 94.2, "sigma1": 17.0, "sigma2": 10.0},
-                "h125a6"  : { "mean": 93.1, "sigma1": 15.6, "sigma2": 11.9},
-                "h125a7"  : { "mean": 93.3, "sigma1": 16.5, "sigma2": 11.7},
-                "h125a8"  : { "mean": 92.5, "sigma1": 16.2, "sigma2": 12.1},#Rough
-                "h125a9"  : { "mean": 91.2, "sigma1": 16.2, "sigma2": 12.1},#Change 1
-                "h125a10" : { "mean": 89.5, "sigma1": 15.5, "sigma2": 11.5},#Change 1 88.5 15.1 11.1 2.14 89.5 15.5 11.5 2.09 
-                "h125a11" : { "mean": 93.2, "sigma1": 16.0, "sigma2": 15.5},#Change 1
-                "h125a12" : { "mean": 92.1, "sigma1": 16.0, "sigma2": 12.4},#Rough
-                "h125a13" : { "mean": 91.8, "sigma1": 15.9, "sigma2": 12.5},
-                "h125a14" : { "mean": 94.5, "sigma1": 16.8, "sigma2": 11.6},#Change 1
-                "h125a15" : { "mean": 91.2, "sigma1": 15.5, "sigma2": 11.9},#Change 1
-                "h125a17" : { "mean": 91.1, "sigma1": 15.2, "sigma2": 12.2},
-                "h125a18" : { "mean": 91.0, "sigma1": 15.3, "sigma2": 12.3},#Rough
-                "h125a19" : { "mean": 90.7, "sigma1": 15.4, "sigma2": 12.4},
-                "h125a20" : { "mean": 89.5, "sigma1": 15.5, "sigma2": 11.6},#Rough
-                "h125a21" : { "mean": 91.3, "sigma1": 14.5, "sigma2": 12.3},
+                "h125a3p6": { "mean": 100,"sigma1": 15.1, "sigma2": 11.1 },
+                "h125a4"  : { "mean": 100,"sigma1": 15.1, "sigma2": 11.1 }, #89.5 15.6 12.5 2.07
+                "h125a5"  : { "mean": 100,"sigma1": 15.1, "sigma2": 11.1 },
+                "h125a6"  : { "mean": 100,"sigma1": 15.1, "sigma2": 11.1 },
+                "h125a7"  : { "mean": 100,"sigma1": 15.1, "sigma2": 11.1 },
+                "h125a8"  : { "mean": 100,"sigma1": 15.1, "sigma2": 11.1 },#Rough
+                "h125a9"  : { "mean": 100, "sigma1": 15.1, "sigma2": 11.5 },#Change 1
+                "h125a10" : { "mean": 100, "sigma1": 15.1, "sigma2": 11.5 },#Change 1 88.5 15.1 11.1 2.14 89.5 15.5 11.5 2.09 
+                "h125a11" : { "mean": 100, "sigma1": 15.1, "sigma2": 11.1 },#Change 1
+                "h125a12" : { "mean": 100, "sigma1": 15.1, "sigma2": 11.5 },#Rough
+                "h125a13" : { "mean": 100, "sigma1": 15.1, "sigma2": 11.5 },
+                "h125a14" : { "mean": 100, "sigma1": 15.1, "sigma2": 11.5 },#Change 1
+                "h125a15" : { "mean": 100, "sigma1": 15.1, "sigma2": 11.5 },#Change 1
+                "h125a16" : { "mean": 100, "sigma1": 15.1, "sigma2": 11.5 },#Change 1
+                "h125a17" : { "mean": 100, "sigma1": 15.1, "sigma2": 11.5 },
+                "h125a18" : { "mean": 100, "sigma1": 15.1, "sigma2": 11.5 },#Rough
+                "h125a19" : { "mean": 100, "sigma1": 15.1, "sigma2": 11.5 },
+                "h125a20" : { "mean": 100, "sigma1": 15.1, "sigma2": 11.5 },#Rough
+                "h125a21" : { "mean": 100, "sigma1": 15.1, "sigma2": 11.5 },
                 "h200a5"  : { "mean": 140, "sigma1": 27.0, "sigma2": 20.0},
                 "h200a9"  : { "mean": 140, "sigma1": 26.2, "sigma2": 22.1},
                 "h200a15" : { "mean": 140, "sigma1": 25.5, "sigma2": 22.9},
@@ -2701,30 +2747,32 @@ class HaaLimits2D(HaaLimits):
                 "h750a17" : { "mean": 500, "sigma1": 149, "sigma2": 76},
                 "h750a19" : { "mean": 500, "sigma1": 154, "sigma2": 73},
                 "h750a21" : { "mean": 499, "sigma1": 153, "sigma2": 75},
-                "h1000a5" : { "mean": 640, "sigma1": 157.0, "sigma2": 80.0},
-                "h1000a9" : { "mean": 640, "sigma1": 156.2, "sigma2": 82.1},
-                "h1000a15": { "mean": 640, "sigma1": 155.5, "sigma2": 82.9},
+                "h1000a10" : { "mean": 875, "sigma1": 300, "sigma2": 80.0},
+                "h1000a20" : { "mean": 875, "sigma1": 300, "sigma2": 82.1},
+                "h1000a30": { "mean": 875, "sigma1": 300, "sigma2": 82.9},
+                "h1000a40": { "mean": 875, "sigma1": 300, "sigma2": 82.9},
             }
         elif 'FP' in region: 
             initialValues = {
-                "h125a3p6": { "mean": 93.4, "sigma1": 13.5, "sigma2": 13.0},
-                "h125a4"  : { "mean": 89.5, "sigma1": 15.5, "sigma2": 10.1},#Change 1 86.5 15.5 10.1 1.58 | 89.5 15.5 10.1 1.409 
-                "h125a5"  : { "mean": 91.1, "sigma1": 15.5, "sigma2": 11.5},#Change 1 89.1 15.5 11.5 1.94 | 91.1 15.5 11.5 1.79 
-                "h125a6"  : { "mean": 94.9, "sigma1": 15.9, "sigma2": 12.8},
-                "h125a7"  : { "mean": 89.4, "sigma1": 15.3, "sigma2": 12.1},#Change 1 87.4 15.3 12.1 1.71 | 89.4 15.3 12.1 1.38
-                "h125a8"  : { "mean": 91.5, "sigma1": 15.5, "sigma2": 12.1},#Change 1 89.3 15.1 12.2 2.24 90.2 15.3 12.1 2.15
-                "h125a9"  : { "mean": 92.5, "sigma1": 15.5, "sigma2": 11.5},#Change 1                1.06(Bad Fit)
-                "h125a10" : { "mean": 88.5, "sigma1": 15.5, "sigma2": 10.1},#Change 1 87.5 15.5 11.9 1.98 88.5 15.5 11.9 1.92
-                "h125a11" : { "mean": 89.5, "sigma1": 14.9, "sigma2": 15.9},#Change 1 89.5 14.9 15.9 1.38
-                "h125a12" : { "mean": 92.5, "sigma1": 15.5, "sigma2": 11.5},#Change 1 90.9 12.1 10.1 3.18 | 83.9 15.5 10.1 3.24 
-                "h125a13" : { "mean": 94.5, "sigma1": 11.1, "sigma2": 16.5},#Change 1 97.1 13.1 12.1 4.11 | 97.1 11.1 12.1 4.11
-                "h125a14" : { "mean": 88.3, "sigma1": 15.5, "sigma2": 11.5},#Change 1 87.3 15.2 11.5 1.85/1.76 88.3 15.5 11.5 1.63
-                "h125a15" : { "mean": 90.8, "sigma1": 18.5, "sigma2": 11.5}, #Change 1 88.8 15.5 11.5 2.54  90.8 9.1 10.5 2.477
-                "h125a17" : { "mean": 90.9, "sigma1": 18.5, "sigma2": 11.5}, #Change 1 88.9 15.5 11.1 2.42  90.9 14.5 9.1 2.42
-                "h125a18" : { "mean": 86.1, "sigma1": 15.5, "sigma2": 11.5},#Change 1`86.1 15.5 11.5 1.62
-                "h125a19" : { "mean": 90.1, "sigma1": 14.1, "sigma2": 15.1},#Change 1 89.0 15.2 11.1 2.12
-                "h125a20" : { "mean": 89.2, "sigma1": 15.1, "sigma2": 10.1},#Change F 88.6 14.1 15.5 1.01   
-                "h125a21" : { "mean": 87.7, "sigma1": 15.5, "sigma2": 12.4},#Change F 86.7 15.5 12.4 1.17 89.7 16.5 11.1 1.21 
+                "h125a3p6": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1 },
+                "h125a4"  : { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1 },#Change 1 86.5 15.5 10.1 1.58 | 89.5 15.5 10.1 1.409 
+                "h125a5"  : { "mean": 92.5, "sigma1": 15.1, "sigma2": 10.5 },#Change 1 89.1 15.5 11.5 1.94 | 91.1 15.5 11.5 1.79 
+                "h125a6"  : { "mean": 92.5, "sigma1": 15.1, "sigma2": 10.5 },
+                "h125a7"  : { "mean": 89.5,"sigma1": 15.1, "sigma2": 11.1 },#Change 1 87.4 15.3 12.1 1.71 | 89.4 15.3 12.1 1.38
+                "h125a8"  : { "mean": 89.5,"sigma1": 15.1, "sigma2": 11.1 },#Change 1 89.3 15.1 12.2 2.24 90.2 15.3 12.1 2.15
+                "h125a9"  : { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1 },#Change 1                1.06(Bad Fit)
+                "h125a10" : { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1 },#Change 1 87.5 15.5 11.9 1.98 88.5 15.5 11.9 1.92
+                "h125a11" : { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.5 },#Change 1 89.5 14.9 15.9 1.38
+                "h125a12" : { "mean": 90.5, "sigma1": 15.1, "sigma2": 11.1 },#Change 1 90.9 12.1 10.1 3.18 | 83.9 15.5 10.1 3.24 
+                "h125a13" : { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1 },#Change 1 97.1 13.1 12.1 4.11 | 97.1 11.1 12.1 4.11
+                "h125a14" : { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1 },#Change 1 87.3 15.2 11.5 1.85/1.76 88.3 15.5 11.5 1.63
+                "h125a15" : { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1 }, #Change 1 88.8 15.5 11.5 2.54  90.8 9.1 10.5 2.477
+                "h125a16" : { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1 }, #Change 1 88.8 15.5 11.5 2.54  90.8 9.1 10.5 2.477
+                "h125a17" : { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1 }, #Change 1 88.9 15.5 11.1 2.42  90.9 14.5 9.1 2.42
+                "h125a18" : { "mean": 89.5, "sigma1": 15.1, "sigma2": 12.1 },#Change 1`86.1 15.5 11.5 1.62
+                "h125a19" : { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1 },#Change 1 89.0 15.2 11.1 2.12
+                "h125a20" : { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1 },#Change F 88.6 14.1 15.5 1.01   
+                "h125a21" : { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1 },#Change F 86.7 15.5 12.4 1.17 89.7 16.5 11.1 1.21 
                 "h200a5"  : { "mean": 140, "sigma1": 27.0, "sigma2": 20.0},
                 "h200a9"  : { "mean": 140, "sigma1": 26.2, "sigma2": 22.1},
                 "h200a15" : { "mean": 140, "sigma1": 25.5, "sigma2": 22.9},
@@ -2755,9 +2803,10 @@ class HaaLimits2D(HaaLimits):
                 "h750a17" : { "mean": 500, "sigma1": 156, "sigma2": 74},
                 "h750a19" : { "mean": 502, "sigma1": 150, "sigma2": 75},
                 "h750a21" : { "mean": 500, "sigma1": 158, "sigma2": 74},
-                "h1000a5" : { "mean": 640, "sigma1": 157.0, "sigma2": 80.0},
-                "h1000a9" : { "mean": 640, "sigma1": 156.2, "sigma2": 82.1},
-                "h1000a15": { "mean": 640, "sigma1": 155.5, "sigma2": 82.9},
+                "h1000a10" : { "mean": 640, "sigma1": 157.0, "sigma2": 80.0},
+                "h1000a20" : { "mean": 640, "sigma1": 156.2, "sigma2": 82.1},
+                "h1000a30": { "mean": 640, "sigma1": 155.5, "sigma2": 82.9},
+                "h1000a40": { "mean": 640, "sigma1": 155.5, "sigma2": 82.9},
             }
 
         return initialValues
@@ -2787,17 +2836,20 @@ class HaaLimits2D(HaaLimits):
     def GetInitialValuesDV(self, region="FP"):
          if 'PP' in region:
             initialValues = {
-                "h125a4": { "mean": 92.1,"sigma1": 15.1, "sigma2": 11.1, "width1":1.15 , "width2": 4.00 }, #1.00
-                "h125a5": { "mean": 89.1,"sigma1": 15.1, "sigma2": 11.1, "width1":1.50 , "width2": 1.25 },
-                "h125a7": { "mean": 89.1,"sigma1": 15.1, "sigma2": 11.1, "width1":1.50 , "width2": 1.20 },
-                "h125a8": { "mean": 89.1,"sigma1": 15.1, "sigma2": 11.1, "width1":1.50 , "width2": 1.15 },
-                "h125a9": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.5, "width1":1.75 , "width2": 1.25},
-                "h125a10": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.5, "width1":1.75 , "width2": 1.25},
-                "h125a11": { "mean": 92.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.50 , "width2": 1.25},
+                "h125a3p6": {"mean": 92.1,"sigma1": 15.1, "sigma2": 11.1, "width1":0.1 , "width2": 0.1 },
+                "h125a4": { "mean": 92.1,"sigma1": 15.1, "sigma2": 11.1, "width1":0.1 , "width2": 0.1 }, #1.00
+                "h125a5": { "mean": 89.1,"sigma1": 15.1, "sigma2": 11.1, "width1":0.1 , "width2": 0.1 },
+                "h125a6": { "mean": 89.1,"sigma1": 15.1, "sigma2": 11.1, "width1":0.1 , "width2": 1.25 },
+                "h125a7": { "mean": 89.1,"sigma1": 15.1, "sigma2": 11.1, "width1":0.1 , "width2": 1.20 },
+                "h125a8": { "mean": 89.1,"sigma1": 15.1, "sigma2": 11.1, "width1":0.1 , "width2": 1.15 },
+                "h125a9": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.5, "width1":0.1 , "width2": 1.25},
+                "h125a10": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.5, "width1":0.1 , "width2": 1.25},
+                "h125a11": { "mean": 92.5, "sigma1": 15.1, "sigma2": 11.1, "width1":0.1 , "width2": 1.25},
                 "h125a12": { "mean": 91.5, "sigma1": 15.1, "sigma2": 11.5, "width1":1.50 , "width2": 1.15},
                 "h125a13": { "mean": 90.5, "sigma1": 15.1, "sigma2": 11.5, "width1":1.50 , "width2": 1.15},
-                "h125a14": { "mean": 90.5, "sigma1": 15.1, "sigma2": 11.5, "width1":1.75 , "width2": 4.20}, #1.20
+                "h125a14": { "mean": 90.5, "sigma1": 15.1, "sigma2": 11.5, "width1":1.75 , "width2": 1.20}, #1.20
                 "h125a15": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.5, "width1":1.55 , "width2": 1.25},
+                "h125a16": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.5, "width1":1.55 , "width2": 1.25},
                 "h125a17": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.5, "width1":1.60 , "width2": 1.20},
                 "h125a18": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.5, "width1":1.50 , "width2": 1.15},
                 "h125a19": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.5, "width1":1.50 , "width2": 1.10},
@@ -2806,8 +2858,10 @@ class HaaLimits2D(HaaLimits):
                 }
          elif 'FP' in region:
              initialValues = {
+                 "h125a3p6": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.5 , "width2": 1.0},
                  "h125a4": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.5 , "width2": 1.0},
                  "h125a5": { "mean": 92.5, "sigma1": 15.1, "sigma2": 10.5, "width1":1.60 , "width2": 1.00},
+                 "h125a6": { "mean": 92.5, "sigma1": 15.1, "sigma2": 10.5, "width1":1.60 , "width2": 1.00},
                  "h125a7": { "mean": 89.5,"sigma1": 15.1, "sigma2": 11.1, "width1":1.55 , "width2": 1.20 },
                  "h125a8": { "mean": 89.5,"sigma1": 15.1, "sigma2": 11.1, "width1":1.50 , "width2": 1.15 },
                  "h125a9": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.50 , "width2": 1.10},
@@ -2817,6 +2871,7 @@ class HaaLimits2D(HaaLimits):
                  "h125a13": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.50 , "width2": 1.15},
                  "h125a14": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.75 , "width2": 1.20},
                  "h125a15": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.55 , "width2": 1.20},
+                 "h125a16": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.55 , "width2": 1.20},
                  "h125a17": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.75 , "width2": 1.00},
                  "h125a18": { "mean": 89.5, "sigma1": 15.1, "sigma2": 12.1, "width1":2.20, "width2": 1.10},
                  "h125a19": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.85, "width2": 1.00},
@@ -2825,6 +2880,49 @@ class HaaLimits2D(HaaLimits):
                  }
          return initialValues
 
+    def GetInitialValuesDVh(self, region="FP"):
+        if 'PP' in region:
+            initialValues = {
+                "h125a3p6": { "mean": [112, 90, 120],"sigma1": [22, 15, 30], "sigma2": [6.7, 6.0, 7], "width1":[8.0, 7, 9] , "width2": [20, 15, 25] }, 
+                "h125a4": { "mean": [112, 90, 120],"sigma1": [22, 15, 30], "sigma2": [6.7, 6.0, 7], "width1":[8.0, 7, 9] , "width2": [20, 15, 25] }, #1.00
+                "h125a5": { "mean": [112, 90, 120], "sigma1": [22, 15, 30], "sigma2": [6.7, 6.0, 7], "width1":[8.0, 7, 9] , "width2": [19, 15, 25] },
+                "h125a7": { "mean": [112, 90, 120], "sigma1": [22, 15, 30], "sigma2": [1, 0., 10], "width1":[8.0, 5, 12] , "width2": [20, 15, 25] },
+                "h125a8": { "mean": 89.1,"sigma1": 15.1, "sigma2": 11.1, "width1":1.50 , "width2": 1.15 },
+                "h125a9": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.5, "width1":1.75 , "width2": 1.25},
+                "h125a10": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.5, "width1":1.75 , "width2": 1.25},
+                "h125a11": { "mean": 92.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.50 , "width2": 1.25},
+                "h125a12": { "mean": 91.5, "sigma1": 15.1, "sigma2": 11.5, "width1":1.50 , "width2": 1.15},
+                "h125a13": { "mean": 90.5, "sigma1": 15.1, "sigma2": 11.5, "width1":1.50 , "width2": 1.15},
+                "h125a14": { "mean": 90.5, "sigma1": 15.1, "sigma2": 11.5, "width1":1.75 , "width2": 4.20}, #1.20
+                "h125a15": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.5, "width1":1.55 , "width2": 1.25},
+                "h125a17": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.5, "width1":1.60 , "width2": 1.20},
+                "h125a18": { "mean": [90.2, 85, 95], "sigma1": [14.3, 10, 20], "sigma2": [16.5, 10, 20], "width1":[1.6, 0., 5.] , "width2": [20, 18, 30]},
+                "h125a19": { "mean": [90.2, 85, 95], "sigma1": [14.3, 10, 20], "sigma2": [16.5, 10, 20], "width1":[1.65, 0., 5.] , "width2": [20, 18, 30]},
+                "h125a20": { "mean": [90.2, 85, 95], "sigma1": [14.3, 10, 20], "sigma2": [16.5, 10, 20], "width1":[1.65, 0., 5.] , "width2": [20, 18, 30]},
+                "h125a21": { "mean": [90.2, 85, 95], "sigma1": [14.3, 10, 20], "sigma2": [16.5, 10, 20], "width1":[1.65, 0., 5.] , "width2": [20, 18, 30]}
+                }
+        elif 'FP' in region:
+            initialValues = {
+                 "h125a3p6": { "mean": 92.1,"sigma1": 15.1, "sigma2": 11.1, "width1":1.15 , "width2": 4.00 }, 
+                "h125a4": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.5 , "width2": 1.0},
+                "h125a5": { "mean": [106, 100, 110], "sigma1": [22, 15, 35], "sigma2": [0.1, 0, 1], "width1": [37, 0.1, 50] , "width2": [55, 10, 100] },
+                "h125a7": { "mean": [106, 100, 110], "sigma1": [22, 15, 35], "sigma2": [0.1, 0, 1], "width1": [37, 0.1, 50] , "width2": [55, 10, 100] },
+                "h125a8": { "mean": 89.5,"sigma1": 15.1, "sigma2": 11.1, "width1":1.50 , "width2": 1.15 },
+                "h125a9": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.50 , "width2": 1.10},
+                "h125a10": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.50 , "width2": 1.25},
+                "h125a11": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.5, "width1":1.75 , "width2": 1.25},
+                "h125a12": { "mean": 90.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.50 , "width2": 1.15},
+                "h125a13": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.50 , "width2": 1.15},
+                "h125a14": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.75 , "width2": 1.20},
+                "h125a15": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.55 , "width2": 1.20},
+                "h125a17": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.75 , "width2": 1.00},
+                "h125a18": { "mean": [85, 80, 100], "sigma1": [8, 5, 15], "sigma2": [0.1, 0, 1], "width1":[20, 10, 50], "width2": [80, 50, 200] },
+                "h125a19": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.85, "width2": 1.00},
+                "h125a20": { "mean": [85, 80, 100], "sigma1": [8, 5, 15], "sigma2": [0.1, 0, 1], "width1":[20, 10, 50], "width2": [80, 50, 200] },
+                "h125a21": { "mean": 89.5, "sigma1": 15.1, "sigma2": 11.1, "width1":1.50, "width2": 1.20}
+            }
+        return initialValues
+
 
          
          
@@ -2832,22 +2930,36 @@ class HaaLimits2D(HaaLimits):
     ### Systematics ###
     ###################
     def addSystematics(self,doBinned=False,addControl=False):
-        self.sigProcesses = tuple([self.SPLINENAME.format(h=h) for h in self.HMASSES])
-        bgs = self.getComponentFractions(self.workspace.pdf('bg_{}_x'.format(self.REGIONS[0])))
-        bgs = [self.rstrip(b,'_'+self.REGIONS[0]) for b in bgs]
+        print "Adding systematics..."
+        #print self.REGIONS
+        #for channel in self.CHANNELS:
+        self.sigProcesses = tuple([self.SPLINENAME.format(h=h)+'_'+c+'_'+r for r in self.REGIONS for h in self.HMASSES for c in self.CHANNELS])
+        bgs = []
+        for c in self.CHANNELS:
+            for r in self.REGIONS:
+                if r == 'control':
+                    region = r
+                else:
+                    region = c+'_'+r
+                bgs += self.getComponentFractions(self.workspace.pdf('bg_{}_x'.format(region)))
+        bgs = [self.rstrip(b,'_'+region) for b in bgs]
         if not self.SPLITBGS: bgs = ['bg']
         self.bgProcesses = bgs
+        #print "***", self.bgProcesses
+        #print "sigProcesses:", self.sigProcesses
+        #print "bgProcesses:", self.bgProcesses
         self._addLumiSystematic()
         self._addMuonSystematic()
-        #self._addTauSystematic()
-        self._addShapeSystematic(doBinned=doBinned)
-        #self._addComponentSystematic(addControl=addControl)
-        self._addRelativeNormUnc()
-        self._addHiggsSystematic()
         self._addAcceptanceSystematic()
-        if not doBinned and not addControl: self._addControlSystematics()
-        if self.YRANGE[1] > 100: self._addHModelSystematic()
-
+        self._addHiggsSystematic()
+        if len(self.BACKGROUNDSHIFTS)>0:
+            self._addShapeSystematic(doBinned=doBinned)
+##        #self._addTauSystematic()
+##        #self._addComponentSystematic(addControl=addControl)
+##        self._addRelativeNormUnc()
+##        if not doBinned and not addControl: self._addControlSystematics()
+##        if self.YRANGE[1] > 100: self._addHModelSystematic()
+            
     def _addHModelSystematic(self):
         
         #if selfDOUBLEEXPO: return
@@ -2904,15 +3016,23 @@ class HaaLimits2D(HaaLimits):
 
 
         processes = {}
-        bgs = self.getComponentFractions(self.workspace.pdf('bg_{}_x'.format(self.REGIONS[0])))
+        #region = self.CHANNEL+'_'+self.REGIONS[0]
+        bgs_tmp = [self.getComponentFractions(self.workspace.pdf('bg_{}_x'.format(channel+'_'+self.REGIONS[0])))for channel in self.CHANNELS]
+        bgs=bgs_tmp[0]
+        while len(bgs_tmp) > 1:
+            bgs.update(bgs_tmp[1])
+            bgs_tmp.pop(1)
+        #print "bgs:", bgs
         bgs = [self.rstrip(b,'_x') for b in bgs]
         bgs = [self.rstrip(b,'_'+self.REGIONS[0]) for b in bgs]
+       
         if not self.SPLITBGS: bgs = ['bg']
         if self.do2D:
-            processes = [self.SPLINENAME] + bgs
+            processes = [self.SPLINENAME+'_'+self.CHANNEL] + bgs
         else:
             for h in self.HMASSES:
-                processes[self.SIGNAME.format(h=h,a='X')] = [self.SPLINENAME.format(h=h)] + bgs
+                processes[self.SIGNAME.format(h=h,a='X')] = [self.SPLINENAME.format(h=h)+'_'+channel for channel in self.CHANNELS] + bgs
+        #print processes
         if subdirectory == '':
             self.printCard('datacards_shape/MuMuTauTau/{}'.format(name),processes=processes,blind=False,saveWorkspace=True)
         else:
