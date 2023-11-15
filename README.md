@@ -10,5 +10,6 @@ cd CMSSW_10_2_13/src
 cmsenv
 git cms-init
 git clone git@github.com:jingyucms/CombineLimitsRunII.git
-./CombineLimits/recipe/recipe.sh
+./CombineLimitsRunII/recipe/recipe.sh
+scramv1 b clean; scramv1 b 
 ```
