@@ -13,3 +13,9 @@ git clone git@github.com:jingyucms/CombineLimitsRunII.git
 ./CombineLimitsRunII/recipe/recipe.sh
 scramv1 b clean; scramv1 b 
 ```
+
+To produce datacard, 
+```
+cd CombineLimitsRunII/HaaLimits/python/
+./run_fit.csh
+```
