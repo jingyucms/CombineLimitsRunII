@@ -438,10 +438,6 @@ class HaaLimits2D(HaaLimits):
                 nameC = 'cont1_{}_xy'.format(region)
 
             bgs = {'recursive': True}
-            # continuum background
-            # TODO, this was bugged, need to fix
-            #bgs[nameC1] = [0.5,0,1]
-            #bgs[nameC2] = [0.5,0,1]
             bgs[nameC] = [0.5,0,1]
             if self.XRANGE[0]<4 and self.XRANGE[1]>=11:
                 bgs[nameJ] = [0.9,0,1]
@@ -521,30 +517,36 @@ class HaaLimits2D(HaaLimits):
             )
         else:
             #if (self.XRANGE[0]<4 or self.XRANGE[0]>10) and not (doPoly or doPolyExpo):
-            if (self.XRANGE[0]<4) and not (doPoly or doPolyExpo):
-                cont1 = Models.Prod('cont1',
-                    'cont1_{}_x'.format(region),
-                    'bg_{}_y'.format(region),
-                )
-                name = 'cont1_{}_xy'.format(region)
-                cont1.build(workspace,name)
-
-                #print "JINGYU6:", cont1, name
-
-                cont2 = Models.Prod('cont2',
-                    'cont2_{}_x'.format(region),
-                    'bg_{}_y'.format(region),
-                )
-                name = 'cont2_{}_xy'.format(region)
-                cont2.build(workspace,name)
-
-            else:
+            if doPoly:
                 cont1 = Models.Prod('cont',
-                    'cont1_{}_x'.format(region),
+                    'contpoly_{}_x'.format(region),
                     'bg_{}_y'.format(region),
                 )
-                name = 'cont1_{}_xy'.format(region)
+                name = 'cont_{}_xy'.format(region)
                 cont1.build(workspace,name)
+            else: 
+                if (self.XRANGE[0]<4 and "TauMuTauHad" in region) or (self.XRANGE[0]<4 and "TauHadTauHad" in region):
+                    cont1 = Models.Prod('cont1',
+                        'cont1_{}_x'.format(region),
+                        'bg_{}_y'.format(region),
+                    )
+                    name = 'cont1_{}_xy'.format(region)
+                    cont1.build(workspace,name)
+    
+                    cont2 = Models.Prod('cont2',
+                        'cont2_{}_x'.format(region),
+                        'bg_{}_y'.format(region),
+                    )
+                    name = 'cont2_{}_xy'.format(region)
+                    cont2.build(workspace,name)
+    
+                else:
+                    cont1 = Models.Prod('cont',
+                        'cont_{}_x'.format(region),
+                        'bg_{}_y'.format(region),
+                    )
+                    name = 'cont_{}_xy'.format(region)
+                    cont1.build(workspace,name)
 
             jpsi1S = Models.Prod('jpsi1S',
                 'jpsi1S_{}_x'.format(region),
@@ -629,9 +631,17 @@ class HaaLimits2D(HaaLimits):
                 thisyrange = [1, 2000]
             elif h == 125:
                 thisyrange = [20, 180]
+            elif h == 250:
+                thisyrange = [10, 400]
+            elif h == 500:
+                thisyrange = [100, 800]
+            elif h == 750:
+                thisyrange = [200, 900]
+            elif h == 1000:
+                thisyrange = [200, 1200]
             else:
                 thisyrange = [1, 2000]
-        #print "yRange:", thisyrange
+        print "yRange:", thisyrange
         ws = ROOT.RooWorkspace('sig')
         ws.factory('{0}[{1}, {2}]'.format(self.XVAR,*thisxrange)) 
         ws.var(self.XVAR).setUnit('GeV')
@@ -724,7 +734,6 @@ class HaaLimits2D(HaaLimits):
                     n2    = [initialValuesDCB["h"+str(h)+"a"+str(a)]["n2"],0.1,5],
                 )
             elif yFitFunc == "DG":
-                #print "DEBUG !!!"
                 if h == 125:
                     modely = Models.DoubleSidedGaussian('sigy',
                                                         x = self.YVAR,
@@ -737,12 +746,52 @@ class HaaLimits2D(HaaLimits):
                                                         yMax = self.YRANGE[1],
                                                         )
                     #print "YRANGE:", self.YRANGE
+                elif h == 250:
+                    modely = Models.DoubleSidedGaussian('sigy',
+                                                        x = self.YVAR,
+                                                        mean    = [initialValuesDG["h"+str(h)+"a"+str(a)]["mean"],initialValuesDG["h"+str(h)+"a"+str(a)]["mean"]*0.8, initialValuesDG["h"+str(h)+"a"+str(a)]["mean"]*1.5],
+                                                        sigma1  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma1"],10,50],
+                                                        sigma2  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma2"],10,50],
+                                                        yMax = self.YRANGE[1],
+                                                        )
+                elif h == 500:
+                    modely = Models.DoubleSidedGaussian('sigy',
+                                                        x = self.YVAR,
+                                                        mean    = [initialValuesDG["h"+str(h)+"a"+str(a)]["mean"],initialValuesDG["h"+str(h)+"a"+str(a)]["mean"]*0.8, initialValuesDG["h"+str(h)+"a"+str(a)]["mean"]*1.5],
+                                                        sigma1  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma1"],50,100],
+                                                        sigma2  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma2"],50,100],
+                                                        yMax = self.YRANGE[1],
+                                                        )
+                elif "TauHadTauHad" in region and h == 750:
+                    modely = Models.DoubleSidedGaussian('sigy',
+                                                        x = self.YVAR,
+                                                        mean    = [700,initialValuesDG["h"+str(h)+"a"+str(a)]["mean"]*0.9, initialValuesDG["h"+str(h)+"a"+str(a)]["mean"]*1.5],
+                                                        sigma1  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma1"],40,150],
+                                                        sigma2  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma2"],40,150],
+                                                        yMax = self.YRANGE[1],
+                                                        )
+                elif h == 750:
+                    modely = Models.DoubleSidedGaussian('sigy',
+                                                        x = self.YVAR,
+                                                        mean    = [initialValuesDG["h"+str(h)+"a"+str(a)]["mean"],initialValuesDG["h"+str(h)+"a"+str(a)]["mean"]*0.9, initialValuesDG["h"+str(h)+"a"+str(a)]["mean"]*1.5],
+                                                        sigma1  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma1"],40,150],
+                                                        sigma2  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma2"],40,150],
+                                                        yMax = self.YRANGE[1],
+                                                        )
+                elif "TauHadTauHad" in region and h == 1000:
+                    modely = Models.DoubleSidedGaussian('sigy',
+                                                        x = self.YVAR,
+                                                        mean    = [900,initialValuesDG["h"+str(h)+"a"+str(a)]["mean"]*0.9, initialValuesDG["h"+str(h)+"a"+str(a)]["mean"]*1.5],
+                                                        sigma1  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma1"],50,300],
+                                                        sigma2  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma2"],50,300],
+                                                        yMax = self.YRANGE[1],
+                                                        )
                 elif h == 1000:
                     modely = Models.DoubleSidedGaussian('sigy',
                                                         x = self.YVAR,
-                                                        mean    = [initialValuesDG["h"+str(h)+"a"+str(a)]["mean"],initialValuesDG["h"+str(h)+"a"+str(a)]["mean"]*0.6, initialValuesDG["h"+str(h)+"a"+str(a)]["mean"]*1.2],
-                                                        sigma1  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma1"],200,400],
-                                                        sigma2  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma2"],50,150],
+                                                        mean    = [initialValuesDG["h"+str(h)+"a"+str(a)]["mean"],initialValuesDG["h"+str(h)+"a"+str(a)]["mean"]*0.9, initialValuesDG["h"+str(h)+"a"+str(a)]["mean"]*1.5],
+                                                        sigma1  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma1"],50,300],
+                                                        sigma2  = [initialValuesDG["h"+str(h)+"a"+str(a)]["sigma2"],50,300],
                                                         yMax = self.YRANGE[1],
                                                         )
             elif yFitFunc == "DV":
@@ -1235,7 +1284,7 @@ class HaaLimits2D(HaaLimits):
             logging.info('Fitting {}'.format(param))
             Hs = sorted(results)
             As = {h: [self.aToStr(a) for a in sorted([self.aToFloat(x) for x in results[h]])] for h in Hs}
-            #print "As", As, Hs, results
+            print "As", As, Hs, results
             xvals = [h for h in Hs for a in As[h]]
             xerrs = [0] * len(xvals)
             yvals = [self.aToFloat(a) for h in Hs for a in As[h]]
@@ -1835,11 +1884,13 @@ class HaaLimits2D(HaaLimits):
             #model.plotOn(yFrame, ROOT.RooFit.Components('conty1_{}_y'.format(region)), ROOT.RooFit.LineStyle(ROOT.kDashed))
             #model.plotOn(yFrame,ROOT.RooFit.Components('conty2_{}_y'.format(region)),ROOT.RooFit.VisualizeError(fr, 1), ROOT.RooFit.LineStyle(ROOT.kDashed), ROOT.RooFit.LineColor(ROOT.kGray))
             #model.plotOn(yFrame, ROOT.RooFit.Components('conty1_{}_y'.format(region)), ROOT.RooFit.LineStyle(ROOT.kDashed))
-            #model.plotOn(yFrame, ROOT.RooFit.Components('conty2_{}_y'.format(region)), ROOT.RooFit.LineStyle(ROOT.kDashed))
+            #model.plotOn(yFrame, ROOT.RooFit.Components('conty1_{}_y'.format(region)), ROOT.RooFit.VisualizeError(fr, 1, True), ROOT.RooFit.LineStyle(ROOT.kDashed))
+            #model.plotOn(yFrame, ROOT.RooFit.Components('conty1_{}_y'.format(region)), ROOT.RooFit.LineStyle(ROOT.kDashed))
             #model.plotOn(yFrame,ROOT.RooFit.Components('conty3_{}_y'.format(region)),ROOT.RooFit.LineStyle(ROOT.kDashed))
             #model.plotOn(yFrame,ROOT.RooFit.Components('conty4_{}_y'.format(region)),ROOT.RooFit.LineStyle(ROOT.kDashed))
             # combined model
             model.plotOn(yFrame,ROOT.RooFit.VisualizeError(fr, 1, True), ROOT.RooFit.NormRange("Full"), ROOT.RooFit.LineStyle(ROOT.kDashed), ROOT.RooFit.FillColor(ROOT.kOrange))
+            #model.plotOn(yFrame, ROOT.RooFit.NormRange("Full"), ROOT.RooFit.LineStyle(ROOT.kDashed))
 
             
             model.plotOn(yFrame)
@@ -1923,15 +1974,12 @@ class HaaLimits2D(HaaLimits):
 
         model = workspace.pdf('bg_{}_xy'.format(region))
         name = 'data_prefit_{}{}'.format(region,'_'+shift if shift else '')
-        #hist = self.histMap[region][shift]['dataNoSig']
         hist = self.histMap[region][shift]['datadriven']
-        print hist.get().find('visFourbodyMass').getMax(), hist.get().find('visFourbodyMass').getMin()
 
         addSignal = kwargs.pop('addSignal', False)
         mh = kwargs.pop('h','125')
         ma = kwargs.pop('a','15')
         if addSignal:
-            print "DEBUGinjection", region, self.histMap[region]['']['hm{}_am{}'.format(mh, ma)]
             hist_wSig = self.histMap[region]['']['hm{}_am{}'.format(mh, ma)]
             
         if hist.InheritsFrom('TH1'):
@@ -1939,19 +1987,14 @@ class HaaLimits2D(HaaLimits):
             integralerr = getHistogram2DIntegralError(hist) * scale
             data = ROOT.RooDataHist(name,name,ROOT.RooArgList(workspace.var(xVar),workspace.var(yVar)),hist)
         else:
-            #print hist.sumEntries('{0}>{2} && {0}<{3} && {1}>{4} && {1}<{5}'.format(xVar,yVar,*self.XRANGE+self.YRANGE)) * scale
-            #print hist_wSig.sumEntries('{0}>{2} && {0}<{3} && {1}>{4} && {1}<{5}'.format(xVar,yVar,*self.XRANGE+self.YRANGE)) * scale
             if addSignal:
                 hist.append(hist_wSig)
             data = hist.Clone(name)
             integral = hist.sumEntries('{0}>{2} && {0}<{3} && {1}>{4} && {1}<{5}'.format(xVar,yVar,*self.XRANGE+self.YRANGE)) * scale
             integralerr = getDatasetIntegralError(hist,'{0}>{2} && {0}<{3} && {1}>{4} && {1}<{5}'.format(xVar,yVar,*self.XRANGE+self.YRANGE)) * scale
-            #print "DEBUG integral", integral, integralerr, hist.isWeighted(), hist.numEntries()
 
         args = data.get()
-        #print "DEBUG!!!", args.find('visFourbodyMass').getMax(), args.find('visFourbodyMass').getMin()
-        fr = model.fitTo(data,ROOT.RooFit.Minimizer("Minuit2", "Migrad"),ROOT.RooFit.Save(),ROOT.RooFit.SumW2Error(True),ROOT.RooFit.Strategy(1),ROOT.RooFit.PrintLevel(1))
-        #fr = model.fitTo(data,ROOT.RooFit.Minimizer("Minuit", "Migrad"),ROOT.RooFit.Save(),ROOT.RooFit.Strategy(2),ROOT.RooFit.SumW2Error(True),ROOT.RooFit.PrintLevel(1))
+        fr = model.fitTo(data,ROOT.RooFit.Minimizer("Minuit", "Migrad"),ROOT.RooFit.Save(),ROOT.RooFit.Strategy(2),ROOT.RooFit.SumW2Error(True),ROOT.RooFit.PrintLevel(1))
         fr.Print('v')
         if shift =='':
             fr.covarianceMatrix().Print('v')
@@ -1959,7 +2002,6 @@ class HaaLimits2D(HaaLimits):
 
         workspace.var(xVar).setBins(self.XBINNING)
         workspace.var(yVar).setBins(self.YBINNING)
-        #print "YBINNING:", self.YBINNING
 
         self.plotModelX(workspace,xVar,data,model,region,shift,postfix='xproj',result=fr)
         if region=='control':
@@ -1993,6 +2035,7 @@ class HaaLimits2D(HaaLimits):
         xVar = '{}_{}'.format(self.XVAR,region)
         #xVar = self.XVAR
         self.addVar(xVar, *self.XRANGE, unit='GeV', label=self.XLABEL, workspace=self.workspace)
+        self.workspace.var(xVar).setBins(6000)
         super(HaaLimits2D, self).buildModel(region=region, workspace=self.workspace, xVar=xVar)
         self.loadBackgroundFit(region, workspace=self.workspace)
 
@@ -2000,6 +2043,9 @@ class HaaLimits2D(HaaLimits):
         name = 'data_obs'
         hist = self.histMap[region]['']['data']
         # use the provided data
+        print "addControlData", hist.Integral(), hist.GetNbinsX(), hist.GetBinContent(hist.GetNbinsX()+1)
+        ## zero out overflow bin
+        hist.SetBinContent(hist.GetNbinsX()+1, 0)
         if hist.InheritsFrom('TH1'):
             data_obs = ROOT.RooDataHist(name,name,ROOT.RooArgList(self.workspace.var(xVar)),self.histMap[region]['']['data'])
         else:
@@ -2013,8 +2059,6 @@ class HaaLimits2D(HaaLimits):
         scale = kwargs.pop('scale',1)
 
         workspace = self.workspace
-        workspace.Print()
-        #print self.REGIONS
 
         for channel in self.CHANNELS:
             for region in self.REGIONS:
@@ -2038,7 +2082,8 @@ class HaaLimits2D(HaaLimits):
                 y.setBins(self.YBINNING)
     
                 # save binned data
-                if doBinned:
+                #if doBinned:
+                if False:
     
                     bgs = self.getComponentFractions(workspace.pdf('bg_{}_x'.format(region)))
     
@@ -2072,50 +2117,22 @@ class HaaLimits2D(HaaLimits):
                                 dh.SetName(bgname+'_binned')
                                 self.wsimport(dh)
     
-                #print "DEBUG!!!", hist, blind
                 name = 'data_obs_{}'.format(region)
                 if blind:
                     hist = self.histMap[region]['']['datadriven']
                 else:
                     hist = self.histMap[region]['']['data']
-                if blind:
-                    # generate a toy data observation from the model
-                    model = workspace.pdf('bg_{}_xy'.format(region))
-                    #h = self.histMap[region]['']['dataNoSig']
-                    h = self.histMap[region]['']['datadriven']
-                    if h.InheritsFrom('TH1'):
-                        integral = h.Integral() * scale # 2D integral?
-                    else:
-                        integral = h.sumEntries('{0}>{2} && {0}<{3} && {1}>{4} && {1}<{5}'.format(xVar,yVar,*self.XRANGE+self.YRANGE)) * scale
-                    if asimov:
-                        data_obs = model.generateBinned(ROOT.RooArgSet(self.workspace.var(xVar),self.workspace.var(yVar)),integral,1)
-                    else:
-                        data_obs = model.generate(ROOT.RooArgSet(self.workspace.var(xVar),self.workspace.var(yVar)),int(integral))
-                    if addSignal:
-                        # TODO, doesn't work with new setup
-                        #raise NotImplementedError
-                        logging.info('Generating dataset with signal {}'.format(region))
-                        self.workspace.var('MH').setVal(mh)
-                        self.workspace.var('MA').setVal(ma)
-                        model = self.workspace.pdf('{}_{}'.format(self.SPLINENAME.format(h=mh),region))
-                        integral = self.workspace.function('integral_{}_{}'.format(self.SPLINENAME.format(h=mh),region)).getVal()
-                        if asimov:
-                            sig_obs = model.generate(ROOT.RooArgSet(self.workspace.var(xVar),self.workspace.var(yVar)),integral,1)
-                            data_obs.add(sig_obs)
-                        else:
-                            sig_obs = model.generate(ROOT.RooArgSet(self.workspace.var(xVar),self.workspace.var(yVar)),int(integral))
-                            data_obs.append(sig_obs)
-                    data_obs.SetName(name)
-                else:
-                    # use the provided data
-                    if hist.InheritsFrom('TH1'):
-                        data_obs = ROOT.RooDataHist(name,name,ROOT.RooArgList(self.workspace.var(xVar),self.workspace.var(yVar)),self.histMap[region]['']['data'])
+                hist.Print("V")
+                if True:
+                    if doBinned:
+                        data = hist.Clone(name)
+                        obs = ROOT.TH2F()
+                        obs = data.createHistogram(data.get().find(xVar),data.get().find(yVar),int(self.XBINNING),int(self.YBINNING),'',data.GetName())
+                        data_obs = ROOT.RooDataHist(name,name,ROOT.RooArgList(self.workspace.var(xVar),self.workspace.var(yVar)),obs)
                     else:
                         data_obs = hist.Clone(name)
                         data_obs.get().find(xVar).setBins(self.XBINNING)
                         data_obs.get().find(yVar).setBins(self.YBINNING)
-                        #print "data_obs:", data_obs
-                        #data_obs.Print("V")
                 self.wsimport(data_obs)
     
                 if hist.InheritsFrom('TH1'):
@@ -2135,8 +2152,6 @@ class HaaLimits2D(HaaLimits):
                     canvas.Print('{}/data_obs_{}_xproj_log.png'.format(self.plotDir,region))
     
                     yFrame = self.workspace.var(yVar).frame()
-                    #print "YLABEL", self.YLABEL
-                    #data_obs.get().find(yVar).setPlotLabel(self.YLABEL)
                     data_obs.plotOn(yFrame)
                     canvas = ROOT.TCanvas('c','c',800,800)
                     yFrame.Draw()
@@ -2148,21 +2163,7 @@ class HaaLimits2D(HaaLimits):
                     canvas.Print('{}/data_obs_{}_yproj.png'.format(self.plotDir,region))
                     canvas.SetLogy(True)
                     canvas.Print('{}/data_obs_{}_yproj_log.png'.format(self.plotDir,region))
-    
-    
-        if addControl: #ADDED BY KYLE
-            region = 'control'
-            xVar = '{}_{}'.format(self.XVAR,region)
-            #namehist = 'data_obs_{}'.format(region)
-            name = 'data_obs'
-            hist = self.histMap[region]['']['data']
-            if hist.InheritsFrom('TH1'):
-                data_obs = ROOT.RooDataHist(name,name,ROOT.RooArgList(self.workspace.var(xVar)),hist)
-            else:
-                data_obs = hist.Clone(name)
-                data_obs.get().find(xVar).setBins(self.XBINNING)
-            self.wsimport(data_obs, ROOT.RooFit.RecycleConflictNodes() )
-
+        workspace.Print()
 
     def addBackgroundModels(self, fixAfterControl=False, fixAfterFP=False, load=False, skipFit=False, addSignal=False, **kwargs):
         print "Adding background models..."
@@ -2232,9 +2233,7 @@ class HaaLimits2D(HaaLimits):
         if fixAfterControl:
             self.fix(False, workspace=workspace, year=year)
         self.background_values = vals
-        #print "background_values:", vals
         self.background_errors = errs
-        #print "background_errs:", errs
         self.background_integrals = integrals
         self.background_integralerrs = integralerrs
         self.background_integralErrors = errors
@@ -2352,23 +2351,28 @@ class HaaLimits2D(HaaLimits):
 
         print "Setting up datacard..."
         #for channel in self.CHANNELS:
+        print 'bg_{}'.format(self.CHANNELS[0]+'_'+self.REGIONS[0])
+        print 'bg_control_{}'.format(self.CHANNELS[0].split('_')[-1])
         bgs = self.getComponentFractions(self.workspace.pdf('bg_{}_x'.format(self.CHANNELS[0]+'_'+self.REGIONS[0])))
-            #bgs_tmp = [self.getComponentFractions(self.workspace.pdf('bg_{}_x'.format(c+'_'+self.REGIONS[0])))for c in self.CHANNELS]
-            #bgs=bgs_tmp[0]
-            #while len(bgs_tmp) > 1:
-            #    bgs.update(bgs_tmp[1])
-            #    bgs_tmp.pop(1)
-            #print "bgs:", bgs
-        print "bgs:", bgs
+        ctrls = self.getComponentFractions(self.workspace.pdf('bg_control_{}'.format(self.CHANNELS[0].split('_')[-1])))
+      
         bgs = [self.rstrip(b,'_x') for b in bgs]
         print "bgs:", bgs
         bgs = [self.rstrip(b,'_'+self.REGIONS[0]) for b in bgs]
         print "bgs:", bgs
         bgs = [self.rstrip(b,'_'+self.CHANNELS[0]) for b in bgs]
         print "bgs:", bgs
+
+
+        ctrls = [self.rstrip(b,'_'+self.CHANNELS[0].split('_')[-1]) for b in ctrls]
+        print "ctrls:", ctrls
+        ctrls = [self.rstrip(b,'_control') for b in ctrls]
+        print "ctrls:", ctrls
+        
         sigs = [self.SPLINENAME.format(h=h) for h in self.HMASSES]
         self.bgs = bgs
         self.sigs = sigs
+        self.controls = ctrls
 
         #print self.bgs, self.sigs
 
@@ -2383,6 +2387,11 @@ class HaaLimits2D(HaaLimits):
 
         # add processes
         for proc in bgs:
+            #if proc.split('_')[1] == region.split('_')[0]:
+            self.addProcess(proc)
+            print "Adding process", proc
+
+        for proc in ctrls:
             #if proc.split('_')[1] == region.split('_')[0]:
             self.addProcess(proc)
             print "Adding process", proc
@@ -2420,18 +2429,9 @@ class HaaLimits2D(HaaLimits):
 
             self.addBin(region)
 
-            for proc in bgs:
-                #key = proc if proc in self.control_integralValues else '{}_{}'.format(proc,region)
-                #integral = self.control_integralValues[key]
-                #self.setExpected(proc,region,integral)
-                #proc = proc.split('_')[0]
-                #print "DEBUG0:", proc, region
+            for proc in ctrls:
                 self.setExpected(proc+'_'+region,region,1)
                 self.addRateParam('integral_{}_{}'.format(proc,region),region,proc+'_'+region)
-                #if 'cont' not in proc and proc not in sigs:
-                #    self.addShape(region,proc,proc)
-                #if 'cont' in proc:
-                #self.addShape(region,proc,'{}_{}'.format(proc,region))
 
             self.setObserved(region,-1) # reads from histogram
 
@@ -2775,9 +2775,10 @@ class HaaLimits2D(HaaLimits):
                 "h200a5"  : { "mean": 140, "sigma1": 27.0, "sigma2": 20.0},
                 "h200a9"  : { "mean": 140, "sigma1": 26.2, "sigma2": 22.1},
                 "h200a15" : { "mean": 140, "sigma1": 25.5, "sigma2": 22.9},
-                "h250a5"  : { "mean": 140, "sigma1": 27.0, "sigma2": 20.0},
-                "h250a9"  : { "mean": 140, "sigma1": 26.2, "sigma2": 22.1},
-                "h250a15" : { "mean": 140, "sigma1": 25.5, "sigma2": 22.9},
+                "h250a5"  : { "mean": 180, "sigma1": 27.0, "sigma2": 20.0},
+                "h250a10" : { "mean": 180, "sigma1": 26.2, "sigma2": 22.1},
+                "h250a15" : { "mean": 180, "sigma1": 25.5, "sigma2": 22.9},
+                "h250a20" : { "mean": 180, "sigma1": 25.5, "sigma2": 22.9},
                 "h300a5"  : { "mean": 215, "sigma1": 44.4, "sigma2": 26.4},
                 "h300a7"  : { "mean": 211, "sigma1": 44.7, "sigma2": 29.6},
                 "h300a9"  : { "mean": 209, "sigma1": 49.0, "sigma2": 39.5},
@@ -2790,22 +2791,23 @@ class HaaLimits2D(HaaLimits):
                 "h400a5"  : { "mean": 240, "sigma1": 67.0, "sigma2": 40.0},
                 "h400a9"  : { "mean": 240, "sigma1": 66.2, "sigma2": 42.1},
                 "h400a15" : { "mean": 240, "sigma1": 65.5, "sigma2": 42.9},
-                "h500a5"  : { "mean": 340, "sigma1": 87.0, "sigma2": 50.0},
-                "h500a9"  : { "mean": 340, "sigma1": 86.2, "sigma2": 52.1},
-                "h500a15" : { "mean": 340, "sigma1": 85.5, "sigma2": 52.9},
-                "h750a5"  : { "mean": 522, "sigma1": 121, "sigma2": 68},
-                "h750a7"  : { "mean": 510, "sigma1": 130, "sigma2": 75},
-                "h750a9"  : { "mean": 508, "sigma1": 133, "sigma2": 80},
-                "h750a11" : { "mean": 505, "sigma1": 137, "sigma2": 80},
-                "h750a13" : { "mean": 503, "sigma1": 138, "sigma2": 82},
+                "h500a5"  : { "mean": 400, "sigma1": 87.0, "sigma2": 50.0},
+                "h500a10"  : { "mean": 400, "sigma1": 86.2, "sigma2": 52.1},
+                "h500a15" : { "mean": 400, "sigma1": 85.5, "sigma2": 52.9},
+                "h500a20" : { "mean": 400, "sigma1": 85.5, "sigma2": 52.9},
+                "h750a10"  : { "mean": 500, "sigma1": 121, "sigma2": 68},
+                "h750a15"  : { "mean": 500, "sigma1": 130, "sigma2": 75},
+                "h750a20"  : { "mean": 500, "sigma1": 133, "sigma2": 80},
+                "h750a25" : { "mean": 500, "sigma1": 137, "sigma2": 80},
+                "h750a30" : { "mean": 500, "sigma1": 138, "sigma2": 82},
                 "h750a15" : { "mean": 501, "sigma1": 145, "sigma2": 80},
                 "h750a17" : { "mean": 500, "sigma1": 149, "sigma2": 76},
                 "h750a19" : { "mean": 500, "sigma1": 154, "sigma2": 73},
                 "h750a21" : { "mean": 499, "sigma1": 153, "sigma2": 75},
-                "h1000a10" : { "mean": 875, "sigma1": 300, "sigma2": 80.0},
-                "h1000a20" : { "mean": 875, "sigma1": 300, "sigma2": 82.1},
-                "h1000a30": { "mean": 875, "sigma1": 300, "sigma2": 82.9},
-                "h1000a40": { "mean": 875, "sigma1": 300, "sigma2": 82.9},
+                "h1000a10" : { "mean": 700, "sigma1": 200, "sigma2": 80.0},
+                "h1000a20" : { "mean": 700, "sigma1": 200, "sigma2": 82.1},
+                "h1000a30": { "mean": 700, "sigma1": 200, "sigma2": 82.9},
+                "h1000a40": { "mean": 700, "sigma1": 200, "sigma2": 82.9},
             }
         elif 'FP' in region: 
             initialValues = {
@@ -2832,8 +2834,9 @@ class HaaLimits2D(HaaLimits):
                 "h200a9"  : { "mean": 140, "sigma1": 26.2, "sigma2": 22.1},
                 "h200a15" : { "mean": 140, "sigma1": 25.5, "sigma2": 22.9},
                 "h250a5"  : { "mean": 140, "sigma1": 27.0, "sigma2": 20.0},
-                "h250a9"  : { "mean": 140, "sigma1": 26.2, "sigma2": 22.1},
+                "h250a10" : { "mean": 140, "sigma1": 26.2, "sigma2": 22.1},
                 "h250a15" : { "mean": 140, "sigma1": 25.5, "sigma2": 22.9},
+                "h250a20" : { "mean": 140, "sigma1": 26.2, "sigma2": 22.1},
                 "h300a5"  : { "mean": 215, "sigma1": 47.0, "sigma2": 27.7},
                 "h300a7"  : { "mean": 211, "sigma1": 51.0, "sigma2": 27.0},
                 "h300a9"  : { "mean": 210, "sigma1": 49.0, "sigma2": 29.0},
