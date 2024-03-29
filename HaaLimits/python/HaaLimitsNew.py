@@ -29,12 +29,13 @@ class HaaLimits(Limits):
     '''
 
     # permanent parameters
-    HMASSES = [125] #,200,250,300,400,500,750,1000]
+    #HMASSES = [125] #,200,250,300,400,500,750,1000]
+    HMASSES = [250]
     HAMAP = {
         125 : ['3p6','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21'],
         #125 : ['5', '18'],
         200 : [5,9,15],
-        250 : [5,9,15],
+        250 : ['5', '10', '15', '20'],
         300 : [5,7,9,11,13,15,17,19,21],
         400 : [5,9,15],
         500 : [5,9,15],
@@ -173,8 +174,10 @@ class HaaLimits(Limits):
 
         bgRes = Models.Voigtian
         #bgRes = Models.BreitWigner
-        #bgResCB = Models.CrystalBall
+        #bgRes = Models.CrystalBall
         #bgRes = Models.DoubleCrystalBall
+        #bgRes = Models.DoubleGaussian
+        #bgRes = Models.Gaussian
         #bgResDCB = Models.DoubleCrystalBall
 
         # jpsi
@@ -230,9 +233,7 @@ class HaaLimits(Limits):
             a2 = 'a2_{}'.format(nameJ2b),
             n2 = 'n2_{}'.format(nameJ2b),
         )
-        #if 'control' in tag:
-        #    nameJ2 = '{}{}'.format(nameJ2b,'_'+tag.replace('_2016','').replace('_2017','').replace('_2018','') if tag else '')
-        #else:
+        
         nameJ2 = '{}{}'.format(nameJ2b.replace('_2016','').replace('_2017','').replace('_2018',''),'_'+tag if tag else '')
         jpsi2S.build(workspace,nameJ2)
         print "nameJ2", nameJ2
@@ -245,18 +246,15 @@ class HaaLimits(Limits):
             jpsi[nameJ1] = '{}_frac'.format(nameJ1b)
             jpsi[nameJ2] = '{}_frac'.format(nameJ2b)
             jpsi = Models.Sum('jpsi', **jpsi)
-            #if 'control' in region:
-            #    nameJ = 'jpsi_{}{}'.format(year, '_'+tag.replace('_2016','').replace('_2017','').replace('_2018','') if tag else '')
-            #else:
+            
             nameJ = 'jpsi{}'.format('_'+tag if tag else '')
             jpsi.build(workspace,nameJ)
 
         # upsilon
         nameU1b = 'upsilon1S_'+year
-        workspace.factory('{0}[{1}, {2}, {3}]'.format('mean_{}'.format(nameU1b), *[9.5,9.3,9.7]))
+        workspace.factory('{0}[{1}, {2}, {3}]'.format('mean_{}'.format(nameU1b), *[9.45,9.4,9.5]))
         workspace.factory('{0}[{1}, {2}, {3}]'.format('sigma_{}'.format(nameU1b),*[0.05,0,0.3]))
-        #workspace.factory('{0}[{1}, {2}, {3}]'.format('sigma_{}'.format(nameU1b),*[0.05,0,0.3]))
-        workspace.factory('{0}[{1}, {2}, {3}]'.format('width_{}'.format(nameU1b),*[0.1,0.01,1]))
+        workspace.factory('{0}[{1}, {2}, {3}]'.format('width_{}'.format(nameU1b),*[0.2,0.01,0.5]))
         workspace.factory('{0}[{1}, {2}, {3}]'.format('a_{}'.format( nameU1b),*[2,0.001,10]))
         workspace.factory('{0}[{1}, {2}, {3}]'.format('n_{}'.format( nameU1b),*[2,0.001,20]))
         workspace.factory('{0}[{1}, {2}, {3}]'.format('a1_{}'.format(nameU1b),*[2,0.001,10]))
@@ -280,10 +278,10 @@ class HaaLimits(Limits):
         print  "nameU1", nameU1
     
         nameU2b = 'upsilon2S_'+year
-        workspace.factory('{0}[{1}, {2}, {3}]'.format('mean_{}'.format(nameU2b), *[10.0,9.8,10.15]))
-        workspace.factory('{0}[{1}, {2}, {3}]'.format('sigma_{}'.format(nameU2b),*[0.06,0,0.3]))
+        workspace.factory('{0}[{1}, {2}, {3}]'.format('mean_{}'.format(nameU2b), *[10.,9.9,10.1]))
+        workspace.factory('{0}[{1}, {2}, {3}]'.format('sigma_{}'.format(nameU2b),*[0.01,0,0.1]))
         #workspace.factory('{0}[{1}, {2}, {3}]'.format('sigma_{}'.format(nameU2b),*[0.06,0,10]))
-        workspace.factory('{0}[{1}, {2}, {3}]'.format('width_{}'.format(nameU2b),*[0.1,0.01,1]))
+        workspace.factory('{0}[{1}, {2}, {3}]'.format('width_{}'.format(nameU2b),*[0.2,0,0.5]))
         workspace.factory('{0}[{1}, {2}, {3}]'.format('a_{}'.format( nameU2b),*[2,0.001,10]))
         workspace.factory('{0}[{1}, {2}, {3}]'.format('n_{}'.format( nameU2b),*[2,0.001,20]))
         workspace.factory('{0}[{1}, {2}, {3}]'.format('a1_{}'.format(nameU2b),*[2,0.001,10]))
@@ -302,18 +300,14 @@ class HaaLimits(Limits):
             a2 = 'a2_{}'.format(nameU2b),
             n2 = 'n2_{}'.format(nameU2b),
         )
-        #if 'control' in region:
-        #    nameU2 = '{}{}'.format(nameU2b,'_'+tag.replace('_2016','').replace('_2017','').replace('_2018','') if tag else '')
-        #else:
         nameU2 = '{}{}'.format(nameU2b.replace('_2016','').replace('_2017','').replace('_2018',''),'_'+tag if tag else '')
         upsilon2S.build(workspace,nameU2)
         print "nameU2", nameU2
     
         nameU3b = 'upsilon3S_'+year
-        workspace.factory('{0}[{1}, {2}, {3}]'.format('mean_{}'.format(nameU3b), *[10.3,10.22,10.5]))
-        workspace.factory('{0}[{1}, {2}, {3}]'.format('sigma_{}'.format(nameU3b),*[0.07,0,0.3]))
-        #workspace.factory('{0}[{1}, {2}, {3}]'.format('sigma_{}'.format(nameU3b),*[0.07,0,10]))
-        workspace.factory('{0}[{1}, {2}, {3}]'.format('width_{}'.format(nameU3b),*[0.1,0.01,1]))
+        workspace.factory('{0}[{1}, {2}, {3}]'.format('mean_{}'.format(nameU3b), *[10.3,10.25,10.35]))
+        workspace.factory('{0}[{1}, {2}, {3}]'.format('sigma_{}'.format(nameU3b),*[0.01,0,0.1]))
+        workspace.factory('{0}[{1}, {2}, {3}]'.format('width_{}'.format(nameU3b),*[0.2,0.0,0.3]))
         workspace.factory('{0}[{1}, {2}, {3}]'.format('a_{}'.format( nameU3b),*[2,0.001,10]))
         workspace.factory('{0}[{1}, {2}, {3}]'.format('n_{}'.format( nameU3b),*[2,0.001,20]))
         workspace.factory('{0}[{1}, {2}, {3}]'.format('a1_{}'.format(nameU3b),*[2,0.001,10]))
@@ -375,95 +369,61 @@ class HaaLimits(Limits):
         upsilon = Models.Sum(nameU, **upsilon)
         upsilon.build(workspace,nameU)
 
-        # sum upsilon and jpsi
-        #nameR = 'resonant{}'.format('_'+tag if tag else '')
-        ##resonant = {'extended': True}
-        #resonant = {'recursive': True}
-        #resonant[nameU]  = [0.75,0,1]
-        #if self.XRANGE[0]<3.3:
-        #    resonant[nameJ] = [0.5,0,1]
-        #elif self.XRANGE[0]<4.0:
-        #    resonant[nameJ2] = [0.5,0,1]
-        #resonant = Models.Sum(nameR, **resonant)
-        #resonant.build(workspace,nameR)
-
-        doPoly = False
-        doPolyExpo = False
-
+        doPoly = True
+        
         print "tag:", tag
 
         # continuum background
         if doPoly:
-            if self.XRANGE[0]<4 and 'control' in region:
+            if self.XRANGE[0]<8 and 'control' in tag:
                 order = 5
             else:
                 order = 1
-            nameC = 'cont_{}'.format(tag if tag else '')
-            cont = Models.Chebychev(nameC,
+            nameCpoly = 'contpoly_{}'.format(tag if tag else '')
+            cont = Models.Chebychev(nameCpoly,
                                     x = xVar,
                                     order = order,
             )
-            cont.build(workspace,nameC)
-
-        elif doPolyExpo:
-            nameC = 'cont_{}'.format(tag if tag else '')
-            cont = Models.ExpoPoly(nameC,
-                x = xVar,
-                order = 3,
+            cont.build(workspace,nameCpoly)
+        
+        if (self.XRANGE[0]<4 and "TauMuTauHad" in tag) or (self.XRANGE[0]<4 and "TauHadTauHad" in tag):
+            nameC1 = 'cont1_{}'.format(tag if tag else '')
+            cont1 = Models.Exponential(nameC1,
+                                       x = xVar,
+                                       lamb = kwargs.pop('lambda_{}'.format(nameC1),[-0.1,-1,0]), #-2,-4,0
             )
-            cont.build(workspace,nameC)
+            cont1.build(workspace,nameC1)
 
-        else:
-            #if (self.XRANGE[0]<4 and tag == 'control')
-            if (self.XRANGE[0]<4 and 'control' in tag) or (self.XRANGE[0]<4 and "TauHad" in tag):
-            #if (self.XRANGE[0]<4 and tag == 'control') or (self.XRANGE[0]<4 and "TauHad" in tag) or self.XRANGE[0]>10.9:
-            #if self.XRANGE[0]<4:
-            #if False:
-                nameC1 = 'cont1_{}'.format(tag if tag else '')
-                #nameC1 = 'cont1'
-                cont1 = Models.Exponential(nameC1,
-                    x = xVar,
-                    lamb = kwargs.pop('lambda_{}'.format(nameC1),[-2,-4,0]), #-2,-4,0
-                )
-                cont1.build(workspace,nameC1)
-
-                nameC2 = 'cont2_{}'.format(tag if tag else '')
-                cont2 = Models.Exponential(nameC2,
-                    x = xVar,
-                    lamb = kwargs.pop('lambda_{}'.format(nameC2),[-0.6,-2,0]), #-0.6,-2,0
-                )
-
-                #nameC2 = 'cont_poly{}'.format('_'+tag if tag else '')
-                # cont_poly = Models.Chebychev(nameC2,
-                #                     x = xVar,
-                #                     order = 7,
-                #                     )
+            nameC2 = 'cont2_{}'.format(tag if tag else '')
+            cont2 = Models.Exponential(nameC2,
+                                       x = xVar,
+                                       lamb = kwargs.pop('lambda_{}'.format(nameC2),[0.1,-0.1,0.2]), #-0.6,-2,0
+            )
                 
-                cont2.build(workspace,nameC2)
+            cont2.build(workspace,nameC2)
 
-                nameC = 'cont_{}'.format(tag if tag else '')
-                #cont = {'extended': True}
-                cont = {'recursive': True}
-                cont[nameC1] = [0.70,0,1]
-                cont[nameC2] = [0.20,0,1]
-                cont = Models.Sum(nameC, **cont)
-                cont.build(workspace,nameC)
-            else:
-                nameC = 'cont1_{}'.format(tag if tag else '')
-                #nameC = 'cont'
-                cont = Models.Exponential(nameC,
-                    x = xVar,
-                    lamb = kwargs.pop('lambda_{}'.format(nameC),[-1,-4,2]), #-2,-4,0
-                )
-                cont.build(workspace,nameC)
+            nameC = 'cont_{}'.format(tag if tag else '')
+            #cont = {'extended': True}
+            cont = {'recursive': True}
+            cont[nameC1] = [0.720,0,1]
+            cont[nameC2] = [0.20, 0,1]
+            cont = Models.Sum(nameC, **cont)
+            cont.build(workspace,nameC)
+        else:
+            nameC = 'cont_{}'.format(tag if tag else '')
+            cont = Models.Exponential(nameC,
+                                      x = xVar,
+                                      lamb = kwargs.pop('lambda_{}'.format(nameC),[-1,-4,2]), #-2,-4,0
+                                      )
+            cont.build(workspace,nameC)
     
         # sum
         bgs = {'recursive': True}
-        # continuum background
-        # TODO, this was bugged, need to fix
-        #bgs[nameC1] = [0.5,0,1]
-        #bgs[nameC2] = [0.5,0,1]
-        bgs[nameC] = [0.5,0,1]
+        if 'control' in tag and doPoly:
+            bgs[nameCpoly] = [0.5,0,1]
+        else:
+            bgs[nameC] = [0.5,0,1]
+            
         if self.XRANGE[0]<4 and self.XRANGE[1]>=11:
             bgs[nameJ] = [0.9,0,1]
             bgs[nameU] = [0.9,0,1]
@@ -523,7 +483,6 @@ class HaaLimits(Limits):
             integral = histMap[self.SIGNAME.format(h=h,a=a)].Integral() * scale
             integralerr = getHistogramIntegralError(histMap[self.SIGNAME.format(h=h,a=a)]) * scale
             print "integral:", h, a, histMap[self.SIGNAME.format(h=h,a=a)].Integral()
-            #print "integral:", integral, hist.Integral(), scale
         else:
             integral = histMap[self.SIGNAME.format(h=h,a=a)].sumEntries('{0}>{1} && {0}<{2}'.format(self.XVAR,*self.XRANGE)) * scale
             integralerr = getDatasetIntegralError(histMap[self.SIGNAME.format(h=h,a=a)],'{0}>{1} && {0}<{2}'.format(self.XVAR,*self.XRANGE)) * scale
@@ -766,6 +725,8 @@ class HaaLimits(Limits):
             yvals = [0.001 for x in xvals]
         elif 'sigx' in param:
             yvals = [0.01 for x in xvals]
+        elif 'mean_sigy' in param:
+            yvals = [0.01*fit.Eval(x) for x in xvals]
         else:
             yvals = [0.05*fit.Eval(x) for x in xvals]
         return yvals
@@ -997,14 +958,21 @@ class HaaLimits(Limits):
         xRange = kwargs.pop('xRange',[])
         postfix = kwargs.pop('postfix','')
         fr = kwargs.pop('result','')
-
+        print "fit results:", fr
+        fr.Print()
         if xRange:
             xFrame = workspace.var(xVar).frame(ROOT.RooFit.Range(*xRange))
         else:
             xFrame = workspace.var(xVar).frame()
-        data.plotOn(xFrame)
+        #data.plotOn(xFrame)
+        if 'control' in region:
+            #data.plotOn(xFrame, ROOT.RooFit.Binning(80))
+            data.plotOn(xFrame)
+        else:
+            data.plotOn(xFrame)
         if not self.SKIPPLOTS:
-            if 'control' in region:
+            if 'control' in region or not self.do2D:
+                model.plotOn(xFrame,ROOT.RooFit.Components('contpoly_{}'.format(region)),ROOT.RooFit.LineStyle(ROOT.kDashed))
                 model.plotOn(xFrame,ROOT.RooFit.Components('cont_{}'.format(region)),ROOT.RooFit.LineStyle(ROOT.kDashed))
                 model.plotOn(xFrame,ROOT.RooFit.Components('cont1_{}'.format(region)),ROOT.RooFit.LineStyle(ROOT.kDashed))
                 model.plotOn(xFrame,ROOT.RooFit.Components('cont2_{}'.format(region)),ROOT.RooFit.LineStyle(ROOT.kDashed))
@@ -1032,7 +1000,6 @@ class HaaLimits(Limits):
             if not 'control' in region:
                 model.plotOn(xFrame,ROOT.RooFit.VisualizeError(fr, 1, True), ROOT.RooFit.NormRange("Full"), ROOT.RooFit.LineStyle(ROOT.kDashed), ROOT.RooFit.FillColor(ROOT.kOrange))
             model.plotOn(xFrame)
-            data.plotOn(xFrame)
         model.paramOn(xFrame,ROOT.RooFit.Layout(0.7,0.9,0.95))
         xFrame.getAttFill().SetFillStyle(0)
 
@@ -1048,41 +1015,35 @@ class HaaLimits(Limits):
 
         canvas = ROOT.TCanvas('c','c',1200,800)
         ROOT.SetOwnership(canvas,False)
-        #canvas.SetRightMargin(0.3)
         plotpad = ROOT.TPad("plotpad", "top pad", 0.0, 0.21, 1.0, 1.0)
         ROOT.SetOwnership(plotpad,False)
         plotpad.SetBottomMargin(0.00)
         plotpad.SetRightMargin(0.2)
+        plotpad.SetLeftMargin(0.12)
         plotpad.Draw()
         ratiopad = ROOT.TPad("ratiopad", "bottom pad", 0.0, 0.0, 1.0, 0.21)
         ROOT.SetOwnership(ratiopad,False)
         ratiopad.SetTopMargin(0.05)
         ratiopad.SetRightMargin(0.2)
         ratiopad.SetBottomMargin(0.5)
-        ratiopad.SetLeftMargin(0.16)
+        ratiopad.SetLeftMargin(0.12)
         ratiopad.SetTickx(1)
         ratiopad.SetTicky(1)
         ratiopad.Draw()
         if plotpad != ROOT.TVirtualPad.Pad(): plotpad.cd()
         xFrame.Draw()
-        #prims = canvas.GetListOfPrimitives()
         prims = plotpad.GetListOfPrimitives()
         for prim in prims:
-            #print "paramBox:", prim.GetName(), prim
             if 'paramBox' in prim.GetName():
                 prim.SetTextSize(0.02)
-                #print prim.GetX1NDC(), prim.GetX2NDC(), prim.GetY1NDC(), prim.GetY2NDC()
                 prim.SetX1NDC(0.5)
                 prim.SetX2NDC(0.9)
                 prim.SetY1NDC(0.6)
                 prim.SetY2NDC(0.9)
-                #print prim.GetX1NDC(), prim.GetX2NDC(), prim.GetY1NDC(), prim.GetY2NDC()
         mi = xFrame.GetMinimum()
         ma = xFrame.GetMaximum()
         if mi<0:
             xFrame.SetMinimum(0.1)
-        #if ma>10000:
-        #    xFrame.SetMaximum(10000)
         print xRange, region, "xFrame", mi, ma
         ratiopad.cd()
         xFrame2.Draw()
@@ -1109,15 +1070,14 @@ class HaaLimits(Limits):
         canvas.Print('{}/model_fit_{}{}{}_log.png'.format(self.plotDir,region,'_'+shift if shift else '','_'+postfix if postfix else ''))
 
     def fitBackground(self,region,shift='', **kwargs):
-        #print "REGIONS", self.REGIONS
+
         scale = kwargs.pop('scale',1)
         workspace = kwargs.pop('workspace',self.workspace)
         xVar = kwargs.pop('xVar',self.XVAR)
         model = workspace.pdf('bg_{}'.format(region))
         name = 'data_prefit_{}{}'.format(region,'_'+shift if shift else '')
-        #hist = self.histMap[region][shift]['dataNoSig']
-        #print "DEBUG5:",region, shift, self.histMap[region][shift].keys()
         hist = self.histMap[region][shift]['datadriven']
+        print hist, type(hist), hist.Integral()
 
         addSignal = kwargs.pop('addSignal', False)
         mh = kwargs.pop('h','125')
@@ -1127,46 +1087,39 @@ class HaaLimits(Limits):
             hist_wSig = self.histMap[region]['']['hm{}_am{}'.format(mh, ma)]
         
         if hist.InheritsFrom('TH1'):
-            
-            #hist.GetXaxis().SetRangeUser(*self.XRANGE)
-            #binning = array('d',[2.5, 2.75, 3., 3.25, 3.5, 3.75, 4., 5, 6, 7, 8.5])
-            #hist.Rebin(10, "rebin", binning)
-            integral = hist.Integral(hist.FindBin(self.XRANGE[0]),hist.FindBin(self.XRANGE[1])) * scale
-            integralerr = getHistogramIntegralError(hist,hist.FindBin(self.XRANGE[0]),hist.FindBin(self.XRANGE[1])) * scale
-            #if region == 'control':
+            integral = hist.Integral(hist.FindBin(self.XRANGE[0]),hist.FindBin(self.XRANGE[1])-1) * scale
+            print self.XRANGE, scale, integral, hist.FindBin(self.XRANGE[0]), hist.FindBin(self.XRANGE[1]), hist.GetBinContent(hist.FindBin(self.XRANGE[1]))
+            integralerr = getHistogramIntegralError(hist,hist.FindBin(self.XRANGE[0]),hist.FindBin(self.XRANGE[1]-1)) * scale
+            #
             data = ROOT.RooDataHist(name,name,ROOT.RooArgList(workspace.var(xVar)),hist)
-            #else:
-            #    tmpData = ROOT.RooDataHist('tmp+'+name,'tmp+'+name,ROOT.RooArgList(workspace.var(xVar)),hist)
-            #binning = ROOT.RooBinning(10, array('d',[2.5, 2.75, 3., 3.25, 3.5, 3.75, 4., 5, 6, 7, 8.5]))
-            #tmpHist = tmpData.createHistogram("tmp",xVar,ROOT.RooArgList(binning))
-            #data = ROOT.RooDataHist(name,name,ROOT.RooArgList(workspace.var(xVar)),tmpHist)
+            data.Print('V')
         else:
-            #print "DEBUG6", hist.sumEntries('{0}>{1} && {0}<{2}'.format(xVar,*self.XRANGE)) * scale
             if addSignal:
                 hist.append(hist_wSig)
             integral = hist.sumEntries('{0}>{1} && {0}<{2}'.format(xVar,*self.XRANGE)) * scale
             integralerr = getDatasetIntegralError(hist,'{0}>{1} && {0}<{2}'.format(xVar,*self.XRANGE)) * scale
             # TODO add support for xVar
             data = hist.Clone(name)
-            #print "DEBUG6", data.sumEntries('{0}>{1} && {0}<{2}'.format(xVar,*self.XRANGE)) * scale
+            
 
         print "---Fitting Background---"
-        fr = model.fitTo(data, ROOT.RooFit.Minimizer("Minuit", "Migrad"), ROOT.RooFit.Save(), ROOT.RooFit.SumW2Error(True), ROOT.RooFit.PrintLevel(-1))
+        fr = model.fitTo(data, ROOT.RooFit.Minimizer("Minuit2", "Migrad"), ROOT.RooFit.Save(), ROOT.RooFit.SumW2Error(True), ROOT.RooFit.PrintLevel(-1))
 
-        workspace.var(xVar).setBins(self.XBINNING*2)
-        #workspace.var(xVar).setBins(binning)
-        #workspace.Print()
+        #workspace.var(xVar).setBins(self.XBINNING*2)
+        workspace.var(xVar).setBins(6000)
+        print xVar, workspace.var(xVar).getBins()
+        
 
         if 'control' in region:
             if self.XRANGE[0]<4:
-                self.plotModelX(workspace,xVar,data,model,region,shift,xRange=[2.5,5],postfix='jpsi')
+                #self.plotModelX(workspace,xVar,data,model,region,shift,xRange=[2.5,5],postfix='jpsi',result=fr)
+                self.plotModelX(workspace,xVar,data,model,region,shift,xRange=self.XRANGE,postfix='jpsi',result=fr)
             elif self.XRANGE[0]<11: 
-                self.plotModelX(workspace,xVar,data,model,region,shift,xRange=[8,12],postfix='upsilon')
+                #self.plotModelX(workspace,xVar,data,model,region,shift,xRange=[8,12],postfix='upsilon',result=fr)
+                self.plotModelX(workspace,xVar,data,model,region,shift,xRange=self.XRANGE,postfix='upsilon',result=fr)
         else:
-            self.plotModelX(workspace,xVar,data,model,region,shift)
+            self.plotModelX(workspace,xVar,data,model,region,shift,result=fr)
                 
-            
-
         pars = fr.floatParsFinal()
         vals = {}
         errs = {}
@@ -1187,7 +1140,8 @@ class HaaLimits(Limits):
     ###############################
     def addControlData(self,**kwargs):
         # build the models after doing the prefit stuff
-        region = 'control'
+        #region = 'control'
+        region = 'control_'+self.CHANNELS[0].split('_')[-1]
         xVar = '{}_{}'.format(self.XVAR,region)
         #xVar = self.XVAR
         self.addVar(xVar, *self.XRANGE, unit='GeV', label=self.XLABEL, workspace=self.workspace)
@@ -1197,6 +1151,7 @@ class HaaLimits(Limits):
         #name = 'data_obs_{}'.format(region)
         name = 'data_obs'
         hist = self.histMap[region]['']['data']
+        print "addControlData", hist.Integral(), hist.GetBinContent(8001)
         # use the provided data
         if hist.InheritsFrom('TH1'):
             data_obs = ROOT.RooDataHist(name,name,ROOT.RooArgList(self.workspace.var(xVar)),self.histMap[region]['']['data'])
@@ -1368,9 +1323,8 @@ class HaaLimits(Limits):
     def getComponentFractions(self,model):
         logging.debug('getComponentFractions')
         logging.debug(model)
-        #print "model", model
         if not model:
-            print model
+            print "model:", model
             raise
         if not isinstance(model,ROOT.RooAddPdf): 
             return {model.GetTitle(): []}
@@ -1556,51 +1510,23 @@ class HaaLimits(Limits):
                     )
                     param.build(workspace, name)
                 elif isinstance(integrals,dict):
-                    param = Models.Param(name,
-                        value  = paramValue,
-                        shifts = paramShifts,
-                        uncertainty = paramUncertainty,
-                    )
-                    param.build(workspace, name)
-                    
+                    if True:
+                        param = Models.Param(name,
+                                             value  = paramValue,
+                                             shifts = paramShifts,
+                                             uncertainty = paramUncertainty,
+                                            )
+                        param.build(workspace, name)
+                    value = paramValue
+                    workspace.factory('{}[{},{},{}]'.format(name,value,value*0.5,value*2))
                 else:
-                    param = Models.Param(name,
-                        value  = paramValue,
-                    )
-                    param.build(workspace, name)
+                    #param = Models.Param(name,
+                    #    value  = paramValue,
+                    #)
+                    #param.build(workspace, name)
+                    value = paramValue
+                    workspace.factory('{}[{},{},{}]'.format(name,value,value*0.5,value*2))
                 if self.workspace.var('uncrt_'+name): self.addSystematic('uncrt_'+name, 'param', systematics=[0,1])
-##             elif 'TauMuTauE' in channel or 'TauMuTauMu' in channel or 'TauETauE' in channel:
-##                 controlIntegrals = allintegrals if region=='control' else self.control_integralValues
-##                 if '2S' in component:
-##                     rname = 'relNorm_{}'.format(component)
-##                     if region=='control':
-##                         rvalue = controlIntegrals[component]/controlIntegrals[component.replace('2S','1S')]
-##                         workspace.factory('{}[{},{},{}]'.format(rname,rvalue,rvalue*0.5,rvalue*1.5))
-##                     param = Models.Param(name,
-##                                          value = '@0*@1',
-##                                          valueArgs = [rname,name.replace('2S','1S')],
-##                     )
-##                     param.build(workspace, name)
-##                 elif '3S' in component:
-##                     rname = 'relNorm_{}'.format(component)
-##                     if region=='control':
-##                         rvalue = controlIntegrals[component]/controlIntegrals[component.replace('3S','1S')]
-##                         workspace.factory('{}[{},{},{}]'.format(rname,rvalue,rvalue*0.5,rvalue*1.5))
-##                     param = Models.Param(name,
-##                                          value = '@0*@1',
-##                                          valueArgs = [rname,name.replace('3S','1S')],
-##                     )
-##                     param.build(workspace, name)
-##                 else:
-##                     # unconstrained for control, FP, but initialized to best fit value
-##                     #value = allintegrals[component]
-##                     #workspace.factory('{}[{},{},{}]'.format(name,value,value*0.5,value*1.5))
-##                     #print name, paramShifts, [name.replace(region,fpRegion)], scale
-##                     param = Models.Param(name,
-##                         value  = paramValue,
-##                         shifts = paramShifts,
-##                     )
-##                     param.build(workspace, name)
             else:
                 controlIntegrals = allintegrals if 'control' in region else self.control_integralValues
                 # 2S and 3S set to a scale factor times 1S that is common to all regions
@@ -1696,7 +1622,8 @@ class HaaLimits(Limits):
         return allintegrals, errors
 
     def addControlModels(self, load=False, skipFit=False):
-        region = 'control'
+        #region = 'control'
+        region = 'control_'+self.CHANNELS[0].split('_')[-1]
         workspace = self.buildWorkspace('control')
         self.initializeWorkspace(workspace=workspace)
         self.buildModel(region=region, workspace=workspace)
@@ -1708,7 +1635,7 @@ class HaaLimits(Limits):
         if load:
             allintegrals, errors = self.loadComponentIntegrals(region)
         if not skipFit:
-            allintegrals, errors = self.buildComponentIntegrals('',region,vals,errs,ints,interrs, workspace.pdf('bg_control'), workspace=self.workspace)
+            allintegrals, errors = self.buildComponentIntegrals('',region,vals,errs,ints,interrs, workspace.pdf('bg_'+region), workspace=self.workspace)
 
         self.control_vals = vals
         self.control_errs = errs
@@ -1752,8 +1679,11 @@ class HaaLimits(Limits):
     def addBackgroundModels(self, fixAfterControl=False, fixAfterFP=False, load=False, skipFit=False, addSignal=False, **kwargs):
         workspace = self.buildWorkspace('bg')
         self.initializeWorkspace(workspace=workspace)
-        self.buildModel(region='control', workspace=workspace)
-        self.loadBackgroundFit('control',workspace=workspace)
+        
+        #self.loadBackgroundFit('control',workspace=workspace)
+        region = 'control_'+self.CHANNELS[0].split('_')[-1]
+        self.buildModel(region=region, workspace=workspace)
+        year = self.CHANNELS[0].split('_')[-1]
         if fixAfterControl:
             self.fix(workspace=workspace)
         vals = {}
@@ -1810,7 +1740,7 @@ class HaaLimits(Limits):
                     allintegrals[region], errors[region] = self.buildComponentIntegrals(channel,region,vals,errs,integrals,integralerrs,workspace.pdf('bg_{}'.format(region)), workspace=self.workspace)
 
         if fixAfterControl:
-            self.fix(False, workspace=workspace)
+            self.fix(False, workspace=workspace, year=year)
         self.background_values = vals
         self.background_errors = errs
         self.background_integrals = integrals
@@ -1951,10 +1881,6 @@ class HaaLimits(Limits):
 
         sigs = [self.SPLINENAME] if self.do2D else [self.SPLINENAME.format(h=h) for h in self.HMASSES]
 
-        #if self.SPLITBGS:
-        #    self.bgs = bgs
-        #else:
-        #    self.bgs = ['bg']
         self.bgs = bgs
         self.sigs = sigs
 
@@ -2014,7 +1940,9 @@ class HaaLimits(Limits):
         self.addCrossSection()
 
         if addControl:
-            region = 'control'
+            year = self.CHANNELS[0].split('_')[-1]
+            region = 'control_'+year
+            
             print "Adding control", addControl
 
             self.addBin(region)
@@ -2023,8 +1951,8 @@ class HaaLimits(Limits):
                 #key = proc if proc in self.control_integralValues else '{}_{}'.format(proc,region)
                 #integral = self.control_integralValues[key]
                 #self.setExpected(proc,region,integral)
-                self.setExpected(proc+'_control',region,1) 
-                self.addRateParam('integral_{}_{}'.format(proc,region),region,proc+'_control')
+                self.setExpected(proc+'_'+region,region,1) 
+                self.addRateParam('integral_{}_{}'.format(proc,region),region,proc+'_'+region)
                 #if 'cont' not in proc and proc not in sigs:
                 #    self.addShape(region,proc,proc)
 
@@ -2172,18 +2100,32 @@ class HaaLimits(Limits):
         self.addSystematic('pdf_gg', 'param', systematics=[0,1])
 
         ## theory
-        #syst = {}
-        #if 125 in self.HMASSES: syst[((self.SPLINENAME.format(h=125),), tuple(self.REGIONS))] = (1+(0.046*48.52+0.004*3.779)/(48.52+3.779)    , 1+(-0.067*48.52-0.003*3.779)/(48.52+3.779))
-        #if 300 in self.HMASSES: syst[((self.SPLINENAME.format(h=300),), tuple(self.REGIONS))] = (1+(0.015*6.59+0.003*1.256)/(6.59+1.256)      , 1+(-0.032*6.59-0.001*1.256)/(6.59+1.256))
-        #if 750 in self.HMASSES: syst[((self.SPLINENAME.format(h=750),), tuple(self.REGIONS))] = (1+(0.020*0.4969+0.003*0.1915)/(0.4969+0.1915), 1+(-0.037*0.4969-0.004*0.1915)/(0.4969+0.1915))
-        #self.addSystematic('higgs_theory','lnN',systematics=syst)
+##         syst = {}
+##         if 125 in self.HMASSES: syst[((self.SPLINENAME.format(h=125),), tuple(self.REGIONS))] = (1+(0.046*48.52+0.004*3.779)/(48.52+3.779), 1+(-0.067*48.52-0.003*3.779)/(48.52+3.779))
+##         if 300 in self.HMASSES: syst[((self.SPLINENAME.format(h=300),), tuple(self.REGIONS))] = (1+(0.015*6.59+0.003*1.256)/(6.59+1.256), 1+(-0.032*6.59-0.001*1.256)/(6.59+1.256))
+##         if 750 in self.HMASSES: syst[((self.SPLINENAME.format(h=750),), tuple(self.REGIONS))] = (1+(0.020*0.4969+0.003*0.1915)/(0.4969+0.1915), 1+(-0.037*0.4969-0.004*0.1915)/(0.4969+0.1915))
+##         self.addSystematic('higgs_theory','lnN',systematics=syst)
+## 
+##         ## pdf+alpha_s
+##         syst = {}
+##         if 125 in self.HMASSES: syst[((self.SPLINENAME.format(h=125),), tuple(self.REGIONS))] = 1+(0.032*48.52+0.021*3.779)/(48.52+3.779)
+##         if 300 in self.HMASSES: syst[((self.SPLINENAME.format(h=300),), tuple(self.REGIONS))] = 1+(0.030*6.59+0.014*1.256)/(6.59+1.256)
+##         if 750 in self.HMASSES: syst[((self.SPLINENAME.format(h=750),), tuple(self.REGIONS))] = 1+(0.040*0.4969+0.022*0.1915)/(0.4969+0.1915)
+##         self.addSystematic('pdf_alpha','lnN',systematics=syst)
 
-        ## pdf+alpha_s
-        #syst = {}
-        #if 125 in self.HMASSES: syst[((self.SPLINENAME.format(h=125),), tuple(self.REGIONS))] = 1+(0.032*48.52+0.021*3.779)/(48.52+3.779)
-        #if 300 in self.HMASSES: syst[((self.SPLINENAME.format(h=300),), tuple(self.REGIONS))] = 1+(0.030*6.59+0.014*1.256)/(6.59+1.256)
-        #if 750 in self.HMASSES: syst[((self.SPLINENAME.format(h=750),), tuple(self.REGIONS))] = 1+(0.040*0.4969+0.022*0.1915)/(0.4969+0.1915)
-        #self.addSystematic('pdf_alpha','lnN',systematics=syst)
+        lumiproc = self.sigProcesses
+        print "sigProcesses", self.sigProcesses
+        theorysyst = {
+            (lumiproc,tuple(c+'_'+r for r in self.REGIONS for c in self.CHANNELS)) : (1+(0.046*48.52+0.004*3.779)/(48.52+3.779), 1+(-0.067*48.52-0.003*3.779)/(48.52+3.779)),
+        }
+        self.addSystematic('higgs_theory','lnN',systematics=theorysyst)
+
+        #pdfsyst = {
+        #    (lumiproc,tuple(c+'_'+r for r in self.REGIONS for c in self.CHANNELS)) : 1+(0.032*48.52+0.021*3.779)/(48.52+3.779),
+        #}
+        #self.addSystematic('pdf_alpha','lnN',systematics=pdfsyst)
+
+        return
 
 
     def _addShapeSystematic(self,doBinned=False):
@@ -2218,13 +2160,38 @@ class HaaLimits(Limits):
         self.addSystematic('CMS_haa_acc','lnN',systematics=accsyst)
 
     def _addLumiSystematic(self):
-        # lumi: 2.5% 2016
+        # lumi: 1.2% 2016, 2.3% 2017, 2.5% 2018
+        if '2016' in self.CHANNELS[0]:
+            uncert = 1.012
+            txt = '_2016'
+        elif '2017' in self.CHANNELS[0]:
+            uncert = 1.023
+            txt = '_2017'
+        elif '2018' in self.CHANNELS[0]:
+            uncert = 1.025
+            txt = '_2018'
         lumiproc = self.sigProcesses
         lumisyst = {
-            (lumiproc,tuple(c+'_'+r for r in self.REGIONS for c in self.CHANNELS)) : 1.025,
+            (lumiproc,tuple(c+'_'+r for r in self.REGIONS for c in self.CHANNELS)) : uncert,
         }
-        #print "lumisyst", lumisyst
-        self.addSystematic('lumi_13TeV','lnN',systematics=lumisyst)
+        self.addSystematic('lumi_13TeV{}'.format(txt),'lnN',systematics=lumisyst)
+
+    def _addMinBiasSystematic(self):
+        # min bias: 1.2% 2016, 2.3% 2017, 2.5% 2018
+        if '2016' in self.CHANNELS[0]:
+            uncert = 1.05
+            txt = '_2016'
+        elif '2017' in self.CHANNELS[0]:
+            uncert = 1.01
+            txt = '_2017'
+        elif '2018' in self.CHANNELS[0]:
+            uncert = 1.01
+            txt = '_2018'
+        lumiproc = self.sigProcesses
+        mbsyst = {
+            (lumiproc,tuple(c+'_'+r for r in self.REGIONS for c in self.CHANNELS)) : uncert,
+        }
+        self.addSystematic('minbias_13TeV{}'.format(txt),'lnN',systematics=mbsyst)
 
     def _addSignalIntepolationSystematic(self):
         # lumi: 2.5% 2016
@@ -2238,10 +2205,33 @@ class HaaLimits(Limits):
     def _addMuonSystematic(self, **kwargs):
         # from z: 1 % + 0.5 % + 0.5 % per muon for id + iso + trig (pt>20)
         muproc = self.sigProcesses
+        print "DEBUG muon syst", self.REGIONS, self.CHANNELS
+        if '2016' in self.CHANNELS[0]:
+            txt = '_2016'
+        elif '2017' in self.CHANNELS[0]:
+            txt = '_2017'
+        elif '2018' in self.CHANNELS[0]:
+            txt = '_2018'
+        if ('TauMuTauE' in self.CHANNELS[0] or 'TauMuTauHad' in self.CHANNELS[0]) and '2016' in self.CHANNELS[0]:
+            uncert = 1.10
+        elif 'TauMuTauMu' in self.CHANNELS[0] and '2016' in self.CHANNELS[0]:
+            uncert = 1.11
+        elif ('TauHadTauHad' in self.CHANNELS[0] or 'TauETauHad' in self.CHANNELS[0]) and '2016' in self.CHANNELS[0]:
+            uncert = 1.08
+        elif ('TauMuTauE' in self.CHANNELS[0] or 'TauMuTauHad' in self.CHANNELS[0]):
+            uncert = 1.08
+        elif 'TauMuTauMu' in self.CHANNELS[0]:
+            uncert = 1.10
+        elif ('TauHadTauHad' in self.CHANNELS[0] or 'TauETauHad' in self.CHANNELS[0]):
+            uncert = 1.05
+        #musyst = {
+        #    (muproc,tuple(c+'_'+r for r in self.REGIONS for c in self.CHANNELS)) : 1+math.sqrt(sum([0.01**2,0.005**2]*2+[0.01**2]+[0.005**2])), # 2 lead have iso, tau_mu doesnt, plus iso
+        #}
         musyst = {
-            (muproc,tuple(c+'_'+r for r in self.REGIONS for c in self.CHANNELS)) : 1+math.sqrt(sum([0.01**2,0.005**2]*2+[0.01**2]+[0.005**2])), # 2 lead have iso, tau_mu doesnt, plus iso
+            (muproc,tuple(c+'_'+r for r in self.REGIONS for c in self.CHANNELS)) : uncert, # 2 lead have iso, tau_mu doesnt, plus iso
         }
-        self.addSystematic('CMS_eff_m','lnN',systematics=musyst)
+        print musyst
+        self.addSystematic('CMS_eff_m{}'.format(txt),'lnN',systematics=musyst)
         
     def _addTauSystematic(self):
         # 5% on sf 0.99 (VL/L) 0.97 (M) 0.95 (T) 0.93 (VT)

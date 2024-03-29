@@ -385,7 +385,8 @@ class Limits(object):
         signals = [x+'_'+y for x in signalName for y in channels]
         backgrounds = [x+'_'+y for x in self.backgrounds for y in channels]
         year = channels[0].split('_')[-1]
-        control = [x.split('_')[0]+'_'+'control'+'_'+year for x in self.backgrounds]
+        control = [x+'_'+'control'+'_'+year for x in self.controls]
+        print "DEBUG controls:", control, self.controls
         #control = [x.split('_')[0]+'_'+'control' for x in self.backgrounds]
         shapes = []
 
@@ -460,7 +461,7 @@ class Limits(object):
                 else:                    
                     processText = process+'_'+bin.split('_')[-1]
                 exp = self.getExpected(processText,bin)
-                #print "exp",processText,bin, exp
+                print "exp",processText, bin, exp
                 if not exp:
                     #print "DEBUG***"
                     toSkip += [(bin,processText)]
@@ -481,6 +482,9 @@ class Limits(object):
                 else:
                     print "processNumbers[colpos]", backgroundsOrig, process, process.split('_')[0], '{0:<10}'.format(backgroundsOrig.index(process.split('_')[0])+1)
                     processNumbers[colpos] = '{0:<10}'.format(backgroundsOrig.index(process.split('_')[0])+1)
+                    #print "processNumbers[colpos]", backgroundsOrig, process, bin, self.rstrip(process,'_'+bin), '{0:<10}'.format(backgroundsOrig.index(self.rstrip(process,'_'+bin))+1)
+                    #processNumbers[colpos] = '{0:<10}'.format(backgroundsOrig.index(process.split('_')[0])+1)
+                    #processNumbers[colpos] = '{0:<10}'.format(backgroundsOrig.index(self.rstrip(process,'_'+bin))+1)
                     #print "processNumbers[colpos]", colpos, processNumbers[colpos]
                 #processNumbers[colpos] = '{0:<10}'.format(processesOrdered.index(process)-len(signals)+1)
                 label = '{0}_{1}'.format(processNames[colpos],binsForRates[colpos])
@@ -558,10 +562,10 @@ class Limits(object):
         logging.debug('Systs to add: {0}'.format([str(x) for x in sorted(combinedSysts.keys())]))
         systRows = []
         for syst in sorted(combinedSysts.keys()):
-            #print "syst:", syst
+            print "syst:", syst
             thisRow = [syst,combinedSysts[syst]['mode']]
             keep = False
-            #print "thisRow:",thisRow
+            print "thisRow:",thisRow
             for bin in bins:
                 for process in processesOrdered:
                     if bin == 'control':
@@ -626,19 +630,26 @@ class Limits(object):
                             s = '{0:<10.4g}'.format(s)
                             keep = True
                     thisRow += [s]
-                    #print thisRow
+                    print "thisRow", thisRow
             if keep: systRows += [thisRow]
             #print "sysRows:", sysRows
 
+        print 'Params systs to add: {0}'.format([str(x) for x in sorted(self.param_systematics.keys())])
+        print self.param_systematics
         logging.debug('Params systs to add: {0}'.format([str(x) for x in sorted(self.param_systematics.keys())]))
         paramRows = []
         for param in sorted(self.param_systematics.keys()):
-            mode = self.param_systematics[param]['mode']
-            if mode in ['flatParam']:
-                paramRows += [[param,mode]]
-            else:
-                values = self.param_systematics[param]['values']
-                paramRows += [[param,mode]+values]
+            #matching = [proc for proc in processesOrdered if proc in param]
+            matching = []
+            for proc in processesOrdered:
+                if proc in param: matching+=[param]
+            if not "ggH_haa" in param or param in matching:
+                mode = self.param_systematics[param]['mode']
+                if mode in ['flatParam']:
+                    paramRows += [[param,mode]]
+                else:
+                    values = self.param_systematics[param]['values']
+                    paramRows += [[param,mode]+values]
 
         kmax = len(systRows)
 
