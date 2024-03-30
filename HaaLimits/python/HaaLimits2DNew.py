@@ -1994,7 +1994,7 @@ class HaaLimits2D(HaaLimits):
             integralerr = getDatasetIntegralError(hist,'{0}>{2} && {0}<{3} && {1}>{4} && {1}<{5}'.format(xVar,yVar,*self.XRANGE+self.YRANGE)) * scale
 
         args = data.get()
-        fr = model.fitTo(data,ROOT.RooFit.Minimizer("Minuit", "Migrad"),ROOT.RooFit.Save(),ROOT.RooFit.Strategy(2),ROOT.RooFit.SumW2Error(True),ROOT.RooFit.PrintLevel(1))
+        fr = model.fitTo(data,ROOT.RooFit.Minimizer("Minuit2", "Migrad"),ROOT.RooFit.Save(),ROOT.RooFit.Strategy(2),ROOT.RooFit.SumW2Error(True),ROOT.RooFit.PrintLevel(1))
         fr.Print('v')
         if shift =='':
             fr.covarianceMatrix().Print('v')

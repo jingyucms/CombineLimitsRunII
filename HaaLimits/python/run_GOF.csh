@@ -1,7 +1,7 @@
 #!/bin/tcsh
-setenv year 2016
-#foreach channel (allchs_2018)
-foreach channel (TauMuTauHad_V2 TauHadTauHad_V3 TauETauHad TauMuTauE TauMuTauMu allchs_${year})
+setenv year 2018
+foreach channel (TauMuTauHad_V2)
+#foreach channel (TauMuTauHad_V2 TauHadTauHad_V3 TauETauHad TauMuTauE TauMuTauMu allchs_${year})
     foreach region (lowmass upsilon highmass)
 	foreach algo (saturated)
 	    if ($region == lowmass) then

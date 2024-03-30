@@ -1103,7 +1103,7 @@ class HaaLimits(Limits):
             
 
         print "---Fitting Background---"
-        fr = model.fitTo(data, ROOT.RooFit.Minimizer("Minuit2", "Migrad"), ROOT.RooFit.Save(), ROOT.RooFit.SumW2Error(True), ROOT.RooFit.PrintLevel(-1))
+        fr = model.fitTo(data, ROOT.RooFit.Minimizer("Minuit2", "Migrad"), ROOT.RooFit.Save(), ROOT.RooFit.Strategy(2), ROOT.RooFit.SumW2Error(True), ROOT.RooFit.PrintLevel(-1))
 
         #workspace.var(xVar).setBins(self.XBINNING*2)
         workspace.var(xVar).setBins(6000)
