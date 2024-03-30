@@ -457,9 +457,9 @@ class Param(object):
             if isinstance(value,basestring) or abs(up/value)>0.0 or abs(down/value)>0.0:
                 ws.factory('{}[0,-10,10]'.format(shift))
                 if "integral" in paramName:
-                    shiftFormula += ''
+                    #shiftFormula += ''
                 #if False:
-                    #shiftFormula += ' + TMath::Max(0,TMath::Exp(@{shift})-1)*({up}) + TMath::Min(0,TMath::Exp(@{shift})-1)*({down})'.format(shift=len(args),up=up,down=down)
+                    shiftFormula += ' + TMath::Max(0,TMath::Exp(@{shift})-1)*({up}) + TMath::Min(0,TMath::Exp(@{shift})-1)*({down})'.format(shift=len(args),up=up,down=down)
                 else:
                     shiftFormula += ' + TMath::Max(0,@{shift})*({up}) + TMath::Min(0,@{shift})*({down})'.format(shift=len(args),up=up,down=down)
                 args.Add(ws.var(shift))
@@ -475,9 +475,9 @@ class Param(object):
             uncrt = uncertainty
             #if "integral" in paramName or "erfScale" in paramName:
             if "integral" in paramName:
+                #shiftFormula += ''
             #if False:
-                #shiftFormula += ' + TMath::Max(0,TMath::Exp(@{shift})-1)*({up}) + TMath::Min(0,TMath::Exp(@{shift})-1)*({down})'.format(shift=len(args),up=uncrt,down=uncrt)
-                shiftFormula += ''
+                shiftFormula += ' + TMath::Max(0,TMath::Exp(@{shift})-1)*({up}) + TMath::Min(0,TMath::Exp(@{shift})-1)*({down})'.format(shift=len(args),up=uncrt,down=uncrt)
             else:
                 #if 'erf' in paramName:
                 #    shiftFormula += ' + TMath::Max(0,@{shift})*({down}) + TMath::Min(0,@{shift})*({up})'.format(shift=len(args),up=uncrt,down=uncrt)
