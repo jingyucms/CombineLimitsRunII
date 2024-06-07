@@ -17,9 +17,9 @@ yvar = 'h'
 h = 125
 xVar = 'invMassMuMu'
 yVar = 'visFourbodyMass'
-massRange = 'lowmass'
+#massRange = 'lowmass'
 #massRange = 'upsilon'
-#massRange = 'highmass'
+massRange = 'highmass'
 if massRange == 'lowmass':
     xRange = [2.5,8.5]
     xBinWidth = 0.1

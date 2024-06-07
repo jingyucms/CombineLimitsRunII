@@ -1,4 +1,5 @@
 universe = vanilla
+requirements = (OpSysAndVer =?= "CentOS7")
 request_memory = 4200
 Executable = run_condor.csh
 Should_Transfer_Files = YES

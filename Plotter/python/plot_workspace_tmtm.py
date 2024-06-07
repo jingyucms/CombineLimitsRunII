@@ -17,8 +17,8 @@ yvar = 'h'
 h = 125
 xVar = 'invMassMuMu'
 yVar = 'visFourbodyMass'
-#massRange = 'lowmass'
-massRange = 'upsilon'
+massRange = 'lowmass'
+#massRange = 'upsilon'
 #massRange = 'highmass'
 if massRange == 'lowmass':
     xRange = [2.5,8.5]
@@ -43,27 +43,27 @@ amasses = ['3p6','5','9','13','17','21']
 colors = [ROOT.kBlue-4, ROOT.kCyan+1, ROOT.kGreen+1, ROOT.kOrange-3, ROOT.kRed+1, ROOT.kMagenta+1]
 
 #jfile = 'fitParams/HaaLimits2D_unbinned_{}/with1DFits/background_PP.json'.format(yvar)
-jfile = '../../HaaLimits/python/fitParams/HaaLimits2D_unbinned_{}/{}_TauETauHad_2018_MVAMedium_DG_yRange_wFakeTauScaleFit_PPonly/background_TauETauHad_2018_PP.json'.format(yvar,massRange)
+jfile = '../../HaaLimits/python/fitParams/HaaLimits2D_unbinned_{}/{}_TauMuTauMu_2018_MVAMedium_DG_wFakeTauScaleFit_PPonly/background_TauMuTauMu_2018_PP.json'.format(yvar,massRange)
 with open(jfile,'r') as f:
     results = json.load(f)
 
-jfile_fakeUp = '../../HaaLimits/python/fitParams/HaaLimits2D_unbinned_{}/{}_TauETauHad_2018_MVAMedium_DG_yRange_wFakeTauScaleFit_PPonly/background_TauETauHad_2018_PP_fakeUp.json'.format(yvar,massRange)
+jfile_fakeUp = '../../HaaLimits/python/fitParams/HaaLimits2D_unbinned_{}/{}_TauMuTauMu_2018_MVAMedium_DG_wFakeTauScaleFit_PPonly/background_TauMuTauMu_2018_PP_fakeUp.json'.format(yvar,massRange)
 with open(jfile_fakeUp,'r') as f:
     results_fakeUp = json.load(f)
 
-jfile_fakeDown = '../../HaaLimits/python/fitParams/HaaLimits2D_unbinned_{}/{}_TauETauHad_2018_MVAMedium_DG_yRange_wFakeTauScaleFit_PPonly/background_TauETauHad_2018_PP_fakeDown.json'.format(yvar,massRange)
+jfile_fakeDown = '../../HaaLimits/python/fitParams/HaaLimits2D_unbinned_{}/{}_TauMuTauMu_2018_MVAMedium_DG_wFakeTauScaleFit_PPonly/background_TauMuTauMu_2018_PP_fakeDown.json'.format(yvar,massRange)
 with open(jfile_fakeDown,'r') as f:
     results_fakeDown = json.load(f)
 
 #rfile = '../../HaaLimits/python/datacards_shape/MuMuTauTau/mmmt_mm_{}_parametric_unbinned_{}_TauHadTauHad_V3_2018_MVAMedium_DG_DoubleExpo_yRange_wFakeJECFit_PPonly.root'.format(yvar,massRange)
-rfile = '../../HaaLimits/python/datacards_shape/MuMuTauTau/mmmt_mm_{}_parametric_unbinned_{}_TauETauHad_2018_MVAMedium_DG_yRange_wFakeTauScaleFit_PPonly.root'.format(yvar,massRange)
+rfile = '../../HaaLimits/python/datacards_shape/MuMuTauTau/mmmt_mm_{}_parametric_unbinned_{}_TauMuTauMu_2018_MVAMedium_DG_wFakeTauScaleFit_PPonly.root'.format(yvar,massRange)
 tfile = ROOT.TFile.Open(rfile)
 
 ws = tfile.Get('w')
 #ws.Print()
 
-pdf_x = ws.pdf('bg_TauETauHad_2018_PP_x')
-pdf_y = ws.pdf('bg_TauETauHad_2018_PP_y')
+pdf_x = ws.pdf('bg_TauMuTauMu_2018_PP_x')
+pdf_y = ws.pdf('bg_TauMuTauMu_2018_PP_y')
 
 # override values
 params = [
@@ -111,23 +111,23 @@ if doPostfit:
         val = postParams[p]['fit'][1]
         param.setVal(val)
 
-data = ws.data('data_obs_TauETauHad_2018_PP')
+data = ws.data('data_obs_TauMuTauMu_2018_PP')
 
 mh = ws.var('MH')
 mh.setVal(h)
 ma = ws.var('MA')
 ma.setVal(a)
 
-sig_x = ws.pdf('ggH_haa_{}_TauETauHad_2018_PP_x'.format(h))
-sig_y = ws.pdf('ggH_haa_{}_TauETauHad_2018_PP_y'.format(h))
-sig_y_heavy = ws.pdf('ggH_haa_{}_TauETauHad_2018_PP_y'.format(250))
+sig_x = ws.pdf('ggH_haa_{}_TauMuTauMu_2018_PP_x'.format(h))
+sig_y = ws.pdf('ggH_haa_{}_TauMuTauMu_2018_PP_y'.format(h))
+sig_y_heavy = ws.pdf('ggH_haa_{}_TauMuTauMu_2018_PP_y'.format(250))
 
 integral = results['integral']
 integral_fakeUp = results_fakeUp['integral']
 integral_fakeDown = results_fakeDown['integral']
 
-sigintegral = ws.function('fullIntegral_ggH_haa_{}_TauETauHad_2018_PP'.format(h)).getVal() * br/0.001
-sigintegral_heavy = ws.function('fullIntegral_ggH_haa_{}_TauETauHad_2018_PP'.format(250)).getVal() * br/0.001 * 10.2/48.58
+sigintegral = ws.function('fullIntegral_ggH_haa_{}_TauMuTauMu_2018_PP'.format(h)).getVal() * br/0.001
+sigintegral_heavy = ws.function('fullIntegral_ggH_haa_{}_TauMuTauMu_2018_PP'.format(250)).getVal() * br/0.001 * 10.2/48.58
 
 print integral, sigintegral, sigintegral_heavy
 
@@ -152,7 +152,7 @@ padUp.Draw()
 
 xFrame = x.frame()
 
-uncert = ws.var('TauETauHad_2018_fake')
+uncert = ws.var('TauMuTauMu_2018_fake')
 uncert.setVal(-1)
 pdf_x.plotOn(xFrame,ROOT.RooFit.Normalization(integral_fakeDown),ROOT.RooFit.LineColor(ROOT.kOrange+1), ROOT.RooFit.LineStyle(ROOT.kDashed), ROOT.RooFit.Name('Fake'))
 uncert.setVal(1)
@@ -193,13 +193,13 @@ xFrame.GetYaxis().SetTitle('Events / {} GeV'.format(xBinWidth))
 CMS_lumi.cmsText = 'CMS'
 CMS_lumi.writeExtraText = isprelim
 #CMS_lumi.extraText = 'Preliminary'
-CMS_lumi.extraText = '#tau_{e}#tau_{h}'
+CMS_lumi.extraText = '#tau_{#mu}#tau_{#mu}'
 CMS_lumi.lumi_13TeV = "%0.1f fb^{-1}" % (59.8)
 CMS_lumi.CMS_lumi(canvas,4,11)
 
 if massRange == 'lowmass':
     xmax = xFrame.GetMaximum()
-    xFrame.SetMaximum(xmax*2)
+    xFrame.SetMaximum(xmax*1.2)
     xFrame.SetMinimum(0.001)
 elif massRange == 'upsilon':
     xFrame.SetMaximum(5)
@@ -240,17 +240,17 @@ legend.Draw()
 canvas.RedrawAxis()
 
 for ext in ['png']:
-    canvas.Print('bg_mm_TauETauHad_{}.{}'.format(massRange,ext))
+    canvas.Print('bg_mm_TauMuTauMu_{}.{}'.format(massRange,ext))
 
 ################################ y ######################################
 y = ws.var(yVar)
 y.setUnit('GeV')
 if yvar=='h':
-    y.setPlotLabel('m(#mu#mu#tau_{e}#tau_{h})')
-    y.SetTitle('m(#mu#mu#tau_{e}#tau_{h})')
+    y.setPlotLabel('m(#mu#mu#tau_{#mu}#tau_{#mu})')
+    y.SetTitle('m(#mu#mu#tau_{#mu}#tau_{#mu})')
 else:
-    y.setPlotLabel('m(#tau_{e}#tau_{h})')
-    y.SetTitle('m(#tau_{e}#tau_{h})')
+    y.setPlotLabel('m(#tau_{#mu}#tau_{#mu})')
+    y.SetTitle('m(#tau_{#mu}#tau_{#mu})')
 #y.setRange('fullrange',2.5,25)
 y.setRange(*yRange)
 y.setBins(int((yRange[1]-yRange[0])/yBinWidth))
@@ -276,8 +276,11 @@ uncert.setVal(-1)
 pdf_y.plotOn(yFrame,ROOT.RooFit.Normalization(integral_fakeDown),ROOT.RooFit.LineColor(ROOT.kOrange+1), ROOT.RooFit.LineStyle(ROOT.kDashed), ROOT.RooFit.Name('Fake'))
 uncert.setVal(1)
 pdf_y.plotOn(yFrame,ROOT.RooFit.Normalization(integral_fakeUp),ROOT.RooFit.LineColor(ROOT.kOrange+1), ROOT.RooFit.LineStyle(ROOT.kDashed))
-sig_y.plotOn(yFrame,ROOT.RooFit.Normalization(sigintegral),ROOT.RooFit.LineColor(ROOT.kRed))#,ROOT.RooFit.NormRange("fullrange"),ROOT.RooFit.Range("range"))
-sig_y_heavy.plotOn(yFrame,ROOT.RooFit.Normalization(sigintegral_heavy),ROOT.RooFit.LineColor(ROOT.kGreen+2))
+
+print sig_y
+sig_y.plotOn(yFrame,ROOT.RooFit.Normalization(sigintegral),ROOT.RooFit.LineColor(ROOT.kRed),ROOT.RooFit.LineStyle(ROOT.kSolid))
+sig_y_heavy.plotOn(yFrame,ROOT.RooFit.Normalization(sigintegral_heavy),ROOT.RooFit.LineColor(ROOT.kGreen+2),ROOT.RooFit.LineStyle(ROOT.kSolid))
+
 uncert.setVal(0)
 pdf_y.plotOn(yFrame,ROOT.RooFit.Normalization(integral),ROOT.RooFit.LineColor(ROOT.kBlue))#,ROOT.RooFit.NormRange("fullrange"),ROOT.RooFit.Range("range"))
 data.plotOn(yFrame)
@@ -297,7 +300,7 @@ pull.SetMinimum(-2)
 pull.GetXaxis().SetTitleSize(0.16)
 pull.GetXaxis().SetLabelSize(0.12)
 pull.GetXaxis().SetTitleOffset(1)
-pull.GetXaxis().SetTitle('m(#mu#mu#tau_{e}#tau_{h}) (GeV)')
+pull.GetXaxis().SetTitle('m(#mu#mu#tau_{#mu}#tau_{#mu}) (GeV)')
 pull.GetXaxis().SetNdivisions(510)
 pull.GetXaxis().SetTickLength(0.09)
 
@@ -316,7 +319,7 @@ yFrame.GetXaxis().SetLimits(*yRange)
 CMS_lumi.cmsText = 'CMS'
 CMS_lumi.writeExtraText = isprelim
 #CMS_lumi.extraText = 'Preliminary'
-CMS_lumi.extraText = '#tau_{e}#tau_{h}'
+CMS_lumi.extraText = '#tau_{#mu}#tau_{#mu}'
 CMS_lumi.lumi_13TeV = "%0.1f fb^{-1}" % (59.8)
 CMS_lumi.CMS_lumi(canvas,4,11)
 
@@ -365,5 +368,5 @@ padUp.RedrawAxis()
 padUp.SetLogy()
 
 for ext in ['png']:
-    canvas.Print('bg_{}_TauETauHad_{}.{}'.format(yvar,massRange,ext))
+    canvas.Print('bg_{}_TauMuTauMu_{}.{}'.format(yvar,massRange,ext))
 

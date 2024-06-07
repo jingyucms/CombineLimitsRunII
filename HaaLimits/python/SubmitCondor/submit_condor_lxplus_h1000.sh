@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export HMASS=125
+export HMASS=1000
 #export CHANNEL=TauMuTauE
 #export CHANNEL=TauHadTauHad_2016_2017_2018
                                          
@@ -20,7 +20,7 @@ export PREFIX=mmmt_mm_h_parametric_unbinned_unblind
 #export CHANNEL=TauMuTauE_2018
 #export CHANNEL=TauMuTauMu_2018
 
-export channel=TauHadTauHad_V3
+export channel=TauHadTauHad_V4
 #export channel=TauMuTauHad_V2
 #export channel=TauMuTauE
 #export channel=TauMuTauMu
@@ -38,8 +38,7 @@ do
     do    
         export WP=$wp
 	export CHANNEL=${channel}_${year}
-        for r in lowmass upsilon highmass 
-        #for r in highmass
+        for r in upsilon highmass highhiggs
         do
     	export MREGION=$r
     	echo $MREGION
@@ -54,7 +53,7 @@ do
     	fi
     	if [[ $MREGION == upsilon ]]
     	then
-    	    for m in `seq 6 0.1 14`
+    	    for m in `seq 10 1 14`
     	    do
     		export AMASS=$m
     		echo Arguments: $HMASS $AMASS $MREGION $CHANNEL $WP
@@ -63,7 +62,16 @@ do
     	fi
     	if [[ $MREGION == highmass ]]
     	then
-    	    for m in `seq 11 0.1 21`
+    	    for m in `seq 11 1 32`
+    	    do
+    		export AMASS=$m
+    		echo Arguments: $HMASS $AMASS $MREGION $CHANNEL $WP
+    		condor_submit condor_lxplus.sub
+    	    done
+    	fi
+	if [[ $MREGION == highhiggs ]]
+    	then
+    	    for m in `seq 28 1 50`
     	    do
     		export AMASS=$m
     		echo Arguments: $HMASS $AMASS $MREGION $CHANNEL $WP

@@ -16,12 +16,18 @@ def floatToText(x):
 
 isprelim = True
 yvar = 'h'
-h = 125
+h = 1000
 xVar = 'invMassMuMu'
 yVar = 'visFourbodyMass'
-massRange = 'lowmass'
+#massRange = 'lowmass'
 #massRange = 'upsilon'
 #massRange = 'highmass'
+
+#year = '2018'
+
+massRange = sys.argv[1]
+year = sys.argv[2]
+
 if massRange == 'lowmass':
     xRange = [2.5,8.5]
     xBinWidth = 0.1
@@ -29,11 +35,15 @@ if massRange == 'lowmass':
 elif massRange == 'upsilon':
     xRange = [6,14]
     xBinWidth = 0.1
-    a = 11.
+    a = 11
 elif massRange == 'highmass':
-    xRange = [11,45]
+    xRange = [11,32]
     xBinWidth = 0.5
     a = 15
+elif massRange == 'highhiggs':
+    xRange = [28,52]
+    xBinWidth = 0.5
+    a = 45
 
 yRange = [0,1200]
 yBinWidth = 10
@@ -44,34 +54,34 @@ doPostfit = False
 amasses = ['3p6','5','9','13','17','21']
 colors = [ROOT.kBlue-4, ROOT.kCyan+1, ROOT.kGreen+1, ROOT.kOrange-3, ROOT.kRed+1, ROOT.kMagenta+1]
 
-rfile = '../../HaaLimits/python/datacards_shape/MuMuTauTau/mmmt_mm_{}_parametric_unbinned_unblind_{}_TauHadTauHad_V3_2018_MVAMedium_DG_DoubleExpo_yRange_wFakeJECFit_PPonly.root'.format(yvar,massRange)
+rfile = '../../HaaLimits/python/datacards_shape/MuMuTauTau/mmmt_mm_{}_parametric_unbinned_unblind_{}_TauHadTauHad_V3_{}_MVAMedium_DG_DoubleExpo_yRange_wFakeJECFit_PPonly.root'.format(yvar,massRange,year)
 tfile = ROOT.TFile.Open(rfile)
 print rfile
 
 ws = tfile.Get('w')
 #ws.Print()
-pdf_x = ws.pdf('bg_TauHadTauHad_V3_2018_PP_x')
-pdf_x_cont = ws.pdf('cont_TauHadTauHad_V3_2018_PP_x')
+pdf_x = ws.pdf('bg_TauHadTauHad_V3_{}_PP_x'.format(year))
+pdf_x_cont = ws.pdf('cont_TauHadTauHad_V3_{}_PP_x'.format(year))
 if massRange == 'lowmass':
-    pdf_x_res = ws.pdf('jpsi_TauHadTauHad_V3_2018_PP_x')
+    pdf_x_res = ws.pdf('jpsi_TauHadTauHad_V3_{}_PP_x'.format(year))
 elif massRange == 'upsilon':
-    pdf_x_res = ws.pdf('upsilon_TauHadTauHad_V3_2018_PP_x')
+    pdf_x_res = ws.pdf('upsilon_TauHadTauHad_V3_{}_PP_x'.format(year))
 else:
     pdf_x_res = None
-pdf_y = ws.pdf('bg_TauHadTauHad_V3_2018_PP_y')
+pdf_y = ws.pdf('bg_TauHadTauHad_V3_{}_PP_y'.format(year))
 
 
-pdf_control = ws.pdf("bg_control_2018")
-pdf_control_cont = ws.pdf("contpoly_control_2018")
+pdf_control = ws.pdf("bg_control_{}".format(year))
+pdf_control_cont = ws.pdf("contpoly_control_{}".format(year))
 if massRange == 'lowmass':
-    pdf_control_res = ws.pdf("jpsi_control_2018")
+    pdf_control_res = ws.pdf("jpsi_control_{}".format(year))
 elif massRange == 'upsilon':
-    pdf_control_res = ws.pdf("upsilon_control_2018")
+    pdf_control_res = ws.pdf("upsilon_control_{}".format(year))
 else:
     pdf_control_res = None
 
 
-fpostfit = open('../../HaaLimits/python/Impacts_TauHadTauHad_{}_2018/fit.log'.format(massRange))
+fpostfit = open('../../HaaLimits/python/Impacts_TauHadTauHad_{}_{}_h1000/fit.log'.format(massRange,year))
 params={}
 for line in fpostfit.readlines():
     txt = []
@@ -87,42 +97,44 @@ for line in fpostfit.readlines():
         var.setVal(float(val))
         params[param]=float(val)
 
-data = ws.data('data_obs_TauHadTauHad_V3_2018_PP')
+data = ws.data('data_obs_TauHadTauHad_V3_{}_PP'.format(year))
 data_control = ws.data('data_obs')
+
+integral_postfit = data.sumEntries()
 
 mh = ws.var('MH')
 mh.setVal(h)
 ma = ws.var('MA')
 ma.setVal(a)
 
-sig_x = ws.pdf('ggH_haa_{}_TauHadTauHad_V3_2018_PP_x'.format(h))
-sig_y = ws.pdf('ggH_haa_{}_TauHadTauHad_V3_2018_PP_y'.format(h))
+sig_x = ws.pdf('ggH_haa_{}_TauHadTauHad_V3_{}_PP_x'.format(h,year))
+sig_y = ws.pdf('ggH_haa_{}_TauHadTauHad_V3_{}_PP_y'.format(h,year))
 
-if massRange == 'lowmass':
-    integral_postfit_cont = params['integral_cont1_TauHadTauHad_V3_2018_PP'] + params['integral_cont2_TauHadTauHad_V3_2018_PP']
-else:
-    integral_postfit_cont = params['integral_cont_TauHadTauHad_V3_2018_PP']
+## if massRange == 'lowmass':
+##     integral_postfit_cont = params['integral_cont1_TauHadTauHad_V3_2018_PP'] + params['integral_cont2_TauHadTauHad_V3_2018_PP']
+## else:
+##     integral_postfit_cont = params['integral_cont_TauHadTauHad_V3_2018_PP']
+## 
+## if massRange == 'lowmass':
+##     integral_postfit_res = params['integral_jpsi1S_TauHadTauHad_V3_2018_PP']+params['relNorm_jpsi2S_2018']*params['integral_jpsi1S_TauHadTauHad_V3_2018_PP']
+## elif massRange == 'upsilon':
+##     integral_postfit_res = params['integral_upsilon1S_TauHadTauHad_V3_2018_PP']+params['relNorm_upsilon2S_2018']*params['integral_upsilon1S_TauHadTauHad_V3_2018_PP']+params['relNorm_upsilon3S_2018']*params['integral_upsilon1S_TauHadTauHad_V3_2018_PP']
+## else:
+##     integral_postfit_res = 0
+## integral_postfit = integral_postfit_cont+integral_postfit_res
 
+
+integral_control_cont = params['integral_contpoly_control_{}'.format(year)]
 if massRange == 'lowmass':
-    integral_postfit_res = params['integral_jpsi1S_TauHadTauHad_V3_2018_PP']+params['relNorm_jpsi2S_2018']*params['integral_jpsi1S_TauHadTauHad_V3_2018_PP']
+    integral_control_res = params['integral_jpsi1S_control_{}'.format(year)]+params['relNorm_jpsi2S_{}'.format(year)]*params['integral_jpsi1S_control_{}'.format(year)]
 elif massRange == 'upsilon':
-    integral_postfit_res = params['integral_upsilon1S_TauHadTauHad_V3_2018_PP']+params['relNorm_upsilon2S_2018']*params['integral_upsilon1S_TauHadTauHad_V3_2018_PP']+params['relNorm_upsilon3S_2018']*params['integral_upsilon1S_TauHadTauHad_V3_2018_PP']
-else:
-    integral_postfit_res = 0
-integral_postfit = integral_postfit_cont+integral_postfit_res
-
-
-integral_control_cont = params['integral_contpoly_control_2018']
-if massRange == 'lowmass':
-    integral_control_res = params['integral_jpsi1S_control_2018']+params['relNorm_jpsi2S_2018']*params['integral_jpsi1S_control_2018']
-elif massRange == 'upsilon':
-    integral_control_res = params['integral_upsilon1S_control_2018']+params['relNorm_upsilon2S_2018']*params['integral_upsilon1S_control_2018']+params['relNorm_upsilon3S_2018']*params['integral_upsilon1S_control_2018']
+    integral_control_res = params['integral_upsilon1S_control_{}'.format(year)]+params['relNorm_upsilon2S_{}'.format(year)]*params['integral_upsilon1S_control_{}'.format(year)]+params['relNorm_upsilon3S_{}'.format(year)]*params['integral_upsilon1S_control_{}'.format(year)]
 else:
     integral_control_res = 0
 integral_control = integral_control_cont+integral_control_res
 
 
-sigintegral = ws.function('fullIntegral_ggH_haa_{}_TauHadTauHad_V3_2018_PP'.format(h)).getVal() * br/0.001
+sigintegral = ws.function('fullIntegral_ggH_haa_{}_TauHadTauHad_V3_{}_PP'.format(h,year)).getVal() * br/0.001
 #sigintegral = -13.2224
 #sigintegral = 0
 #mh.setVal(250)
@@ -135,7 +147,7 @@ data_control.Print()
 print integral_control
 
 ################################ control ######################################
-x = ws.var('invMassMuMu_control_2018')
+x = ws.var('invMassMuMu_control_{}'.format(year))
 x.setUnit('GeV')
 x.setPlotLabel('m(#mu#mu)')
 x.SetTitle('m(#mu#mu)')
@@ -245,8 +257,8 @@ if massRange == 'lowmass' or massRange == 'upsilon':
     padUp.SetLogy()
 canvas.RedrawAxis()
 
-for ext in ['png']:
-    canvas.Print('postfit_mm_control_{}.{}'.format(massRange,ext))
+#for ext in ['png']:
+#    canvas.Print('postfit_mm_control_{}_{}.{}'.format(massRange,year,ext))
 
 
 ################################ x ######################################
@@ -271,11 +283,11 @@ padUp.Draw()
 
 xFrame = x.frame()
 
-if pdf_x_res:
-    pdf_x_cont.plotOn(xFrame,ROOT.RooFit.Normalization(integral_postfit_cont),ROOT.RooFit.LineColor(ROOT.kBlue), ROOT.RooFit.LineStyle(ROOT.kDashed), ROOT.RooFit.Name('cont'))
-    pdf_x_res.plotOn(xFrame,ROOT.RooFit.Normalization(integral_postfit_res),ROOT.RooFit.AddTo('cont'),ROOT.RooFit.LineColor(ROOT.kBlue), ROOT.RooFit.Name('central'))
-else:
-    pdf_x_cont.plotOn(xFrame,ROOT.RooFit.Normalization(integral_postfit_cont),ROOT.RooFit.LineColor(ROOT.kBlue), ROOT.RooFit.Name('cont'))
+## if pdf_x_res:
+##     pdf_x_cont.plotOn(xFrame,ROOT.RooFit.Normalization(integral_postfit_cont),ROOT.RooFit.LineColor(ROOT.kBlue), ROOT.RooFit.LineStyle(ROOT.kDashed), ROOT.RooFit.Name('cont'))
+##     pdf_x_res.plotOn(xFrame,ROOT.RooFit.Normalization(integral_postfit_res),ROOT.RooFit.AddTo('cont'),ROOT.RooFit.LineColor(ROOT.kBlue), ROOT.RooFit.Name('central'))
+## else:
+##     pdf_x_cont.plotOn(xFrame,ROOT.RooFit.Normalization(integral_postfit_cont),ROOT.RooFit.LineColor(ROOT.kBlue), ROOT.RooFit.Name('cont'))
 sig_x.plotOn(xFrame,ROOT.RooFit.Normalization(sigintegral),ROOT.RooFit.LineColor(ROOT.kRed))
 
 pdf_x.plotOn(xFrame,ROOT.RooFit.Normalization(integral_postfit),ROOT.RooFit.LineColor(ROOT.kBlue))
@@ -324,7 +336,7 @@ if massRange == 'lowmass':
     xFrame.SetMaximum(xmax*5)
     xFrame.SetMinimum(0.5)
 elif massRange == 'upsilon':
-    xFrame.SetMaximum(80)
+    xFrame.SetMaximum(120)
 xFrame.GetYaxis().SetTitleOffset(1.1)
 xFrame.GetXaxis().SetLabelSize(0)
 
@@ -359,7 +371,7 @@ if massRange == 'lowmass':
 canvas.RedrawAxis()
 
 for ext in ['png']:
-    canvas.Print('postfit_mm_TauHadTauHad_{}.{}'.format(massRange,ext))
+    canvas.Print('postfit_h1000_mm_TauHadTauHad_{}_{}.{}'.format(massRange,year,ext))
 
 ################################ y ######################################
 y = ws.var(yVar)
@@ -481,5 +493,5 @@ padUp.SetLogy()
 
 for ext in ['png']:
     #canvas.Print('bg_{}_TauMuTauHad_Erfb_{}.{}'.format(yvar,massRange,ext))
-    canvas.Print('postfit_{}_TauHadTauHad_{}.{}'.format(yvar,massRange,ext))
+    canvas.Print('postfit_h1000_{}_TauHadTauHad_{}_{}.{}'.format(yvar,massRange,year,ext))
 

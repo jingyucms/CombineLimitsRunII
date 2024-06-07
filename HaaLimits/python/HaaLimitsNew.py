@@ -413,7 +413,7 @@ class HaaLimits(Limits):
             nameC = 'cont_{}'.format(tag if tag else '')
             cont = Models.Exponential(nameC,
                                       x = xVar,
-                                      lamb = kwargs.pop('lambda_{}'.format(nameC),[-1,-4,2]), #-2,-4,0
+                                      lamb = kwargs.pop('lambda_{}'.format(nameC),[-0.1,-2,1]), #-2,-4,0
                                       )
             cont.build(workspace,nameC)
     
@@ -1088,6 +1088,8 @@ class HaaLimits(Limits):
         
         if hist.InheritsFrom('TH1'):
             integral = hist.Integral(hist.FindBin(self.XRANGE[0]),hist.FindBin(self.XRANGE[1])-1) * scale
+            #hist.Rebin(200)
+            print hist.GetNbinsX()
             print self.XRANGE, scale, integral, hist.FindBin(self.XRANGE[0]), hist.FindBin(self.XRANGE[1]), hist.GetBinContent(hist.FindBin(self.XRANGE[1]))
             integralerr = getHistogramIntegralError(hist,hist.FindBin(self.XRANGE[0]),hist.FindBin(self.XRANGE[1]-1)) * scale
             #
@@ -1100,13 +1102,14 @@ class HaaLimits(Limits):
             integralerr = getDatasetIntegralError(hist,'{0}>{1} && {0}<{2}'.format(xVar,*self.XRANGE)) * scale
             # TODO add support for xVar
             data = hist.Clone(name)
-            
+
+        #workspace.var(xVar).setBins(600)
 
         print "---Fitting Background---"
         fr = model.fitTo(data, ROOT.RooFit.Minimizer("Minuit2", "Migrad"), ROOT.RooFit.Save(), ROOT.RooFit.Strategy(2), ROOT.RooFit.SumW2Error(True), ROOT.RooFit.PrintLevel(-1))
 
         #workspace.var(xVar).setBins(self.XBINNING*2)
-        workspace.var(xVar).setBins(6000)
+        #workspace.var(xVar).setBins(30)
         print xVar, workspace.var(xVar).getBins()
         
 

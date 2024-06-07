@@ -9,7 +9,7 @@ ROOT.gROOT.SetBatch()
 logging.basicConfig(format='%(asctime)s.%(msecs)03d %(levelname)s %(name)s: %(message)s', level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
 
 doSig = False
-blind = True
+blind = False
 doMatrix = False
 doGrid = False #True
 doDouble = False #True
@@ -25,7 +25,10 @@ hmasses = [125] #[125,300,750]
 #hmasses = [750] # for now since it is done
 amasses_full = [x*.1 for x in range(36,210,1)] + [21.0]
 #amasses_full.remove(10.4)
-amasses_full = [x*.1 for x in range(60,210,1)]
+#amasses_full = [x*.1 for x in range(60,210,1)]
+
+#amasses_full = [x for x in range(10,46)]
+
 #print amasses_full
 #amasses_full.remove(7.8)
 #amasses_full = [x*.1 for x in range(35,210,2)] + [21.1]
@@ -36,7 +39,8 @@ amasses_full = [x*.1 for x in range(60,210,1)]
 #hdfs_dir='root://cmseos.fnal.gov//eos/uscms/store/user/zhangj/HaaLimits/Limits/'
 #hdfs_dir='./combineOutput/'
 #hdfs_dir='./testPPFPfeb2023/'
-hdfs_dir='./testPPonlyNov2023/'
+#hdfs_dir='./testPPonlyNov2023/'
+hdfs_dir='./unblindMay2025/'
 
 #grid_dir = '/hdfs/store/user/dntaylor/2019-08-14_MuMuTauTauLimits_MergedGridPacks_v1'
 #grid_dir = '/hdfs/store/user/dntaylor/2019-10-20_MuMuTauTauLimits_MergedGridPacks_v1'
@@ -59,16 +63,16 @@ hs_grid_dir = '/hdfs/store/user/dntaylor/2019-11-27_MuMuTauTauLimits_MergedGridP
 #higgsCombineHtoAAH125A20_mm_h_parametric_highmassWith1DFitsDVteth.AsymptoticLimits.mH125.root 
 
 
-#tag = 'REGION_TauMuTauHad_V2_2016_MVAMedium_DG_DoubleExpo_yRange_wFakeTauScaleFit_PPonly_V6'
-#tag = 'REGION_TauHadTauHad_V3_2016_MVAMedium_DG_DoubleExpo_yRange_wFakeJECFit_PPonly_V6'
-#tag = 'REGION_TauMuTauMu_2016_MVAMedium_DG_wFakeTauScaleFit_PPonly_V6'
-#tag = 'REGION_TauMuTauE_2016_MVAMedium_DG_wFakeTauScaleFit_PPonly_V6'
-tag = 'REGION_TauETauHad_2016_MVAMedium_DG_yRange_wFakeTauScaleFit_PPonly_V6'
+#tag = 'REGION_TauMuTauHad_V2_2016_MVAMedium_DG_DoubleExpo_yRange_wFakeTauScaleFit_PPonly'
+tag = 'REGION_TauHadTauHad_V3_2017_MVAMedium_DG_DoubleExpo_yRange_wFakeJECFit_PPonly'
+#tag = 'REGION_TauMuTauMu_2016_MVAMedium_DG_wFakeTauScaleFit_PPonly'
+#tag = 'REGION_TauMuTauE_2016_MVAMedium_DG_wFakeTauScaleFit_PPonly'
+#tag = 'REGION_TauETauHad_2018_MVAMedium_DG_yRange_wFakeTauScaleFit_PPonly'
 #tag = 'REGION_allchs_2018_V6'
 #tag = 'REGION_allchs_V6'
 
 
-prefix = 'mmmt_mm_h_parametric_unbinned'
+prefix = '_mmmt_mm_h_parametric_unbinned_unblind'
 
 
 if doDouble: tag = 'REGIONWith1DFitsDoubleExpoDVmediumDeepVSjet'
@@ -349,7 +353,7 @@ def readQs(mode,h,a):
             elif 'upsilon' in mode: regionmode = 'upsilon'
             elif 'highmass' in mode: regionmode = 'highmass'
             else: sys.exit("Unknown Region Mode!!!")
-            tfile = ROOT.TFile.Open('{hdfs}higgsCombine{pf}_m{h}_ma{a}_{mode}.AsymptoticLimits.mH125.root'.format(hdfs=hdfs_dir, pf=prefix, h=h, a=a, mode=tag.replace('REGION',regionmode)))
+            tfile = ROOT.TFile.Open('{hdfs}higgsCombine{pf}_m{h}_ma{a}_{mode}.AsymptoticLimits.mH{h}.root'.format(hdfs=hdfs_dir, pf=prefix, h=h, a=a, mode=tag.replace('REGION',regionmode)))
             #print tfile
         else:
             tfile = ROOT.TFile.Open('{hdfs}/{m}/{h}/higgsCombineHToAAH{h}A{a}_{m}.AsymptoticLimits.mH{h}.root'.format(hdfs=hdfs_dir,h=h,a=a,m=mode))
@@ -370,8 +374,8 @@ def readQs(mode,h,a):
 
 regionXs = {
     'lowmass' : [3.6,8],
-    'upsilon' : [8,11.5],
-    'highmass': [11.5,21],
+    'upsilon' : [8,12.5],
+    'highmass': [12.5,21],
 }
 
 for m in allModes:

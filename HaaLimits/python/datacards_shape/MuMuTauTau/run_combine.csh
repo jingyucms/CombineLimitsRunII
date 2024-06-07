@@ -27,11 +27,11 @@ foreach region (lowmass upsilon highmass)
     
 
     ### combine same year different channels
-    #python combineChannels.py $year ${prefix}_${region}_allchs_${year}_hm125_amX.txt ${prefix}_${region}_TauMuTauHad_V2_${year}_MVAMedium_DG_DoubleExpo_yRange_wFakeTauScaleFit_PPonly_hm125_amX.txt ${prefix}_${region}_TauMuTauE_${year}_MVAMedium_DG_wFakeTauScaleFit_PPonly_hm125_amX.txt ${prefix}_${region}_TauETauHad_${year}_MVAMedium_DG_yRange_wFakeTauScaleFit_PPonly_hm125_amX.txt ${prefix}_${region}_TauHadTauHad_V3_${year}_MVAMedium_DG_DoubleExpo_yRange_wFakeJECFit_PPonly_hm125_amX.txt ${prefix}_${region}_TauMuTauMu_${year}_MVAMedium_DG_wFakeTauScaleFit_PPonly_hm125_amX.txt
+    python combineChannels.py $year ${prefix}_${region}_allchs_${year}_hm125_amX.txt ${prefix}_${region}_TauMuTauHad_V2_${year}_MVAMedium_DG_DoubleExpo_yRange_wFakeTauScaleFit_PPonly_hm125_amX.txt ${prefix}_${region}_TauMuTauE_${year}_MVAMedium_DG_wFakeTauScaleFit_PPonly_hm125_amX.txt ${prefix}_${region}_TauETauHad_${year}_MVAMedium_DG_yRange_wFakeTauScaleFit_PPonly_hm125_amX.txt ${prefix}_${region}_TauHadTauHad_V3_${year}_MVAMedium_DG_DoubleExpo_yRange_wFakeJECFit_PPonly_hm125_amX.txt ${prefix}_${region}_TauMuTauMu_${year}_MVAMedium_DG_wFakeTauScaleFit_PPonly_hm125_amX.txt
 
 
     ### combine all
-    combineCards.py ${prefix}_${region}_allchs_2016_hm125_amX.txt ${prefix}_${region}_allchs_2017_hm125_amX.txt ${prefix}_${region}_allchs_2018_hm125_amX.txt > ${prefix}_${region}_allchs_hm125_amX.txt.tmp
-    sed 's/ch1_//g' ${prefix}_${region}_allchs_hm125_amX.txt.tmp | sed 's/ch2_//g' | sed 's/ch3_//g' > ${prefix}_${region}_allchs_hm125_amX.txt
-    rm -rf ${prefix}_${region}_allchs_hm125_amX.txt.tmp
+    #combineCards.py ${prefix}_${region}_allchs_2016_hm125_amX.txt ${prefix}_${region}_allchs_2017_hm125_amX.txt ${prefix}_${region}_allchs_2018_hm125_amX.txt > ${prefix}_${region}_allchs_hm125_amX.txt.tmp
+    #sed 's/ch1_//g' ${prefix}_${region}_allchs_hm125_amX.txt.tmp | sed 's/ch2_//g' | sed 's/ch3_//g' > ${prefix}_${region}_allchs_hm125_amX.txt
+    #rm -rf ${prefix}_${region}_allchs_hm125_amX.txt.tmp
 end
