@@ -186,11 +186,10 @@ class HaaLimits2D(HaaLimits):
                 else:
                     erf = Models.Erf('erf1',
                         x = yVar,
-                        erfScale = kwargs.pop('erfScale_{}'.format(nameE), [0.05,0,10]),
-                        erfShift = kwargs.pop('erfShift_{}'.format(nameE), [70,10,200]),
+                        erfScale = kwargs.pop('erfScale_{}'.format(nameE), [0.05,0.01,0.2]),
+                        erfShift = kwargs.pop('erfShift_{}'.format(nameE), [50,10,100]),
                     )
                     erf.build(workspace,nameE)
-                    #print "JINGYU4: nameE", nameE
 
                 nameC = 'conty{}'.format('_'+tag if tag else '')
                 if self.YCORRELATION:
@@ -205,10 +204,9 @@ class HaaLimits2D(HaaLimits):
                 else:
                     cont = Models.Exponential('conty',
                         x = yVar,
-                        lamb = kwargs.pop('lambda_{}'.format(nameC), [-0.05,-1,0]),
+                        lamb = kwargs.pop('lambda_{}'.format(nameC), [-0.05,-0.1,-0.0001]),
                     )
                     cont.build(workspace, nameC)
-                    #print "JINGYU4: nameC", nameC
 
                 bg = Models.Prod('bg',
                     nameE,
@@ -219,8 +217,8 @@ class HaaLimits2D(HaaLimits):
                 nameE1 = 'erf1{}'.format('_'+tag if tag else '')
                 erf1 = Models.Erf('erf1',
                     x = yVar,
-                    erfScale = kwargs.pop('erfScale_{}'.format(nameE1), [0.05,0,0.1]),
-                    erfShift = kwargs.pop('erfShift_{}'.format(nameE1), [70,10,200]),
+                    erfScale = kwargs.pop('erfScale_{}'.format(nameE1), [0.05,0.01,0.1]),
+                    erfShift = kwargs.pop('erfShift_{}'.format(nameE1), [70,10,100]),
                 )
                 erf1.build(workspace,nameE1)
 
@@ -1994,7 +1992,9 @@ class HaaLimits2D(HaaLimits):
             integralerr = getDatasetIntegralError(hist,'{0}>{2} && {0}<{3} && {1}>{4} && {1}<{5}'.format(xVar,yVar,*self.XRANGE+self.YRANGE)) * scale
 
         args = data.get()
+        workspace.var(xVar).setBins(60)
         fr = model.fitTo(data,ROOT.RooFit.Minimizer("Minuit2", "Migrad"),ROOT.RooFit.Save(),ROOT.RooFit.Strategy(2),ROOT.RooFit.SumW2Error(True),ROOT.RooFit.PrintLevel(1))
+        #fr = model.fitTo(data,ROOT.RooFit.Minimizer("Minuit", "Migrad"),ROOT.RooFit.Save(),ROOT.RooFit.Strategy(2),ROOT.RooFit.SumW2Error(True),ROOT.RooFit.PrintLevel(1))
         fr.Print('v')
         if shift =='':
             fr.covarianceMatrix().Print('v')
@@ -2003,6 +2003,7 @@ class HaaLimits2D(HaaLimits):
         workspace.var(xVar).setBins(self.XBINNING)
         workspace.var(yVar).setBins(self.YBINNING)
 
+        workspace.var(xVar).setBins(60)
         self.plotModelX(workspace,xVar,data,model,region,shift,postfix='xproj',result=fr)
         if region=='control':
             self.plotModelX(workspace,xVar,data,model,region,shift,xRange=[2.5,5],postfix='xproj_jpsi',result=fr)
@@ -2047,10 +2048,12 @@ class HaaLimits2D(HaaLimits):
         ## zero out overflow bin
         hist.SetBinContent(hist.GetNbinsX()+1, 0)
         if hist.InheritsFrom('TH1'):
-            data_obs = ROOT.RooDataHist(name,name,ROOT.RooArgList(self.workspace.var(xVar)),self.histMap[region]['']['data'])
+            hist.Rebin(10)
+            data_obs = ROOT.RooDataHist(name,name,ROOT.RooArgList(self.workspace.var(xVar)),hist)
         else:
             # TODO add support for xVar
             data_obs = hist.Clone(name)
+        print hist.GetNbinsX()
         self.wsimport(data_obs, ROOT.RooFit.RecycleConflictNodes() )
 
     def addData(self,blind=True,asimov=False,addSignal=False,addControl=False,doBinned=False,**kwargs):
@@ -2352,9 +2355,13 @@ class HaaLimits2D(HaaLimits):
         print "Setting up datacard..."
         #for channel in self.CHANNELS:
         print 'bg_{}'.format(self.CHANNELS[0]+'_'+self.REGIONS[0])
-        print 'bg_control_{}'.format(self.CHANNELS[0].split('_')[-1])
+        if addControl:
+            print 'bg_control_{}'.format(self.CHANNELS[0].split('_')[-1])
         bgs = self.getComponentFractions(self.workspace.pdf('bg_{}_x'.format(self.CHANNELS[0]+'_'+self.REGIONS[0])))
-        ctrls = self.getComponentFractions(self.workspace.pdf('bg_control_{}'.format(self.CHANNELS[0].split('_')[-1])))
+        if addControl:
+            ctrls = self.getComponentFractions(self.workspace.pdf('bg_control_{}'.format(self.CHANNELS[0].split('_')[-1])))
+        else:
+            ctrls = []
       
         bgs = [self.rstrip(b,'_x') for b in bgs]
         print "bgs:", bgs

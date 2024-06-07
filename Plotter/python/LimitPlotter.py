@@ -721,11 +721,12 @@ class LimitPlotter(PlotterBase):
         lines = {}
         ratiounity = {}
 
+        #print xvalsMulti, quartilesMulti
         for ilim, (xvals, quartiles) in enumerate(zip(xvalsMulti, quartilesMulti)):
 
             limits = quartiles
             expected[ilim], oneSigma[ilim], twoSigma[ilim], observed[ilim] = self._getGraphs(xvals,limits,xVar=xVar,smooth=smooth,model=model)
-
+            #print "ilim",ilim, (xvals, quartiles)
             if ilim==0:
                 expected[ilim].GetXaxis().SetLimits(xvalsMulti[0][0],xvalsMulti[-1][-1])
                 expected[ilim].GetXaxis().SetTitle(xaxis)
@@ -1632,7 +1633,7 @@ class LimitPlotter(PlotterBase):
 
             for i in range(len(xvals[x])):
                 if not all(limits[xvals[x][i]]):
-                    print i, xvals[x][i], limits[xvals[x][i]]
+                    #print i, xvals[x][i], limits[xvals[x][i]]
                     continue
                 expected[x].SetPoint(     i,   xvals[x][i],     limits[xvals[x][i]][2]) # 0.5
                 observed[x].SetPoint(     i,   xvals[x][i],     limits[xvals[x][i]][5]) # obs
