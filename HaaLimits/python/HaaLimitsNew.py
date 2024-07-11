@@ -998,7 +998,8 @@ class HaaLimits(Limits):
             #model.plotOn(xFrame,ROOT.RooFit.Components('upsilon3S'),ROOT.RooFit.LineColor(ROOT.kRed))
             # combined model
             if not 'control' in region:
-                model.plotOn(xFrame,ROOT.RooFit.VisualizeError(fr, 1, True), ROOT.RooFit.NormRange("Full"), ROOT.RooFit.LineStyle(ROOT.kDashed), ROOT.RooFit.FillColor(ROOT.kOrange))
+                #model.plotOn(xFrame,ROOT.RooFit.VisualizeError(fr, 1, True), ROOT.RooFit.NormRange("Full"), ROOT.RooFit.LineStyle(ROOT.kDashed), ROOT.RooFit.FillColor(ROOT.kOrange))
+                model.plotOn(xFrame,ROOT.RooFit.VisualizeError(fr, 1, True), ROOT.RooFit.LineStyle(ROOT.kDashed), ROOT.RooFit.FillColor(ROOT.kOrange))
             model.plotOn(xFrame)
         model.paramOn(xFrame,ROOT.RooFit.Layout(0.7,0.9,0.95))
         xFrame.getAttFill().SetFillStyle(0)

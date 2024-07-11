@@ -37,9 +37,16 @@ elif massRange == 'upsilon':
     xBinWidth = 0.1
     a = 11.
 elif massRange == 'highmass':
-    xRange = [11,45]
+    xRange = [11,50]
     xBinWidth = 0.5
     a = 15
+
+if year == '2018':
+    lumi = 59.830
+elif year == '2017':
+    lumi = 41.480
+elif year == '2016':
+    lumi = 36.330
 
 yRange = [0,1200]
 yBinWidth = 10
@@ -77,7 +84,7 @@ else:
     pdf_control_res = None
 
 
-fpostfit = open('../../HaaLimits/python/Impacts_TauMuTauMu_{}_{}/fit.log'.format(massRange,year))
+fpostfit = open('../../HaaLimits/python/Impacts_TauMuTauMu_{}_{}_h{}/fit.log'.format(massRange,year,h))
 params={}
 for line in fpostfit.readlines():
     txt = []
@@ -133,8 +140,8 @@ integral_control = integral_control_cont+integral_control_res
 sigintegral = ws.function('fullIntegral_ggH_haa_{}_TauMuTauMu_{}_PP'.format(h,year)).getVal() * br/0.001
 #sigintegral = -13.2224
 #sigintegral = 0
-#mh.setVal(250)
-#sigintegral_heavy = ws.function('fullIntegral_ggH_haa_{}_TauMuTauHad_V2_2018_PP'.format(250)).getVal() * br/0.001
+mh.setVal(1000)
+sigintegral_heavy = ws.function('fullIntegral_ggH_haa_{}_TauMuTauMu_{}_PP'.format(1000,year)).getVal() * br/0.001
 
 #print sigintegral,sigintegral_heavy
 data.Print()
@@ -213,7 +220,7 @@ CMS_lumi.cmsText = 'CMS'
 CMS_lumi.writeExtraText = isprelim
 #CMS_lumi.extraText = 'Preliminary'
 CMS_lumi.extraText = '#tau_{#mu}#tau_{#mu}'
-CMS_lumi.lumi_13TeV = "%0.1f fb^{-1}" % (59.8)
+CMS_lumi.lumi_13TeV = "%0.1f fb^{-1}" % (lumi)
 CMS_lumi.CMS_lumi(canvas,4,11)
 
 if massRange == 'lowmass' or massRange == 'upsilon':
@@ -228,7 +235,7 @@ legend.SetTextFont(42)
 legend.SetBorderSize(0)
 legend.SetFillColor(0)
 legend.SetFillStyle(0000)
-#legend.SetNColumns(2)
+ #legend.SetNColumns(2)
 
 for prim in reversed(padUp.GetListOfPrimitives()):
     #print prim.GetTitle()
@@ -324,7 +331,7 @@ CMS_lumi.cmsText = 'CMS'
 CMS_lumi.writeExtraText = isprelim
 #CMS_lumi.extraText = 'Preliminary'
 CMS_lumi.extraText = '#tau_{#mu}#tau_{#mu}'
-CMS_lumi.lumi_13TeV = "%0.1f fb^{-1}" % (59.8)
+CMS_lumi.lumi_13TeV = "%0.1f fb^{-1}" % (lumi)
 CMS_lumi.CMS_lumi(canvas,4,11)
 
 if massRange == 'lowmass':
@@ -440,7 +447,7 @@ CMS_lumi.cmsText = 'CMS'
 CMS_lumi.writeExtraText = isprelim
 #CMS_lumi.extraText = 'Preliminary'
 CMS_lumi.extraText = '#tau_{#mu}#tau_{#mu}'
-CMS_lumi.lumi_13TeV = "%0.1f fb^{-1}" % (59.8)
+CMS_lumi.lumi_13TeV = "%0.1f fb^{-1}" % (lumi)
 CMS_lumi.CMS_lumi(canvas,4,11)
 
 
@@ -470,6 +477,10 @@ for prim in reversed(padUp.GetListOfPrimitives()):
     elif 'ggH' in prim.GetTitle() and '250' in prim.GetTitle():
         #title = '#splitline{{m_{{H}} = {} GeV, m_{{a}} = {} GeV}}{{B(h #rightarrow aa #rightarrow #mu#mu#tau#tau) = {}}}'.format(h,a,floatToText(br))
         title = 'm_{{H}} = {} GeV, m_{{a}} = {} GeV'.format(250,a)
+        legend.AddEntry(prim, title, 'l')
+    elif 'ggH' in prim.GetTitle() and '1000' in prim.GetTitle():
+        #title = '#splitline{{m_{{H}} = {} GeV, m_{{a}} = {} GeV}}{{B(h #rightarrow aa #rightarrow #mu#mu#tau#tau) = {}}}'.format(h,a,floatToText(br))
+        title = 'm_{{H}} = {} GeV, m_{{a}} = {} GeV'.format(1000,a)
         legend.AddEntry(prim, title, 'l')
 legend.AddEntry('central', 'Background Model', 'l')
 #legend.AddEntry('Fake', 'Tight-to-Loose Ratio Uncertainty', 'l')

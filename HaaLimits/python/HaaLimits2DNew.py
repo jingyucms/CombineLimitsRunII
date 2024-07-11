@@ -1887,7 +1887,8 @@ class HaaLimits2D(HaaLimits):
             #model.plotOn(yFrame,ROOT.RooFit.Components('conty3_{}_y'.format(region)),ROOT.RooFit.LineStyle(ROOT.kDashed))
             #model.plotOn(yFrame,ROOT.RooFit.Components('conty4_{}_y'.format(region)),ROOT.RooFit.LineStyle(ROOT.kDashed))
             # combined model
-            model.plotOn(yFrame,ROOT.RooFit.VisualizeError(fr, 1, True), ROOT.RooFit.NormRange("Full"), ROOT.RooFit.LineStyle(ROOT.kDashed), ROOT.RooFit.FillColor(ROOT.kOrange))
+            #model.plotOn(yFrame,ROOT.RooFit.VisualizeError(fr, 1, True), ROOT.RooFit.NormRange("Full"), ROOT.RooFit.LineStyle(ROOT.kDashed), ROOT.RooFit.FillColor(ROOT.kOrange))
+            model.plotOn(yFrame,ROOT.RooFit.VisualizeError(fr, 1, True), ROOT.RooFit.LineStyle(ROOT.kDashed), ROOT.RooFit.FillColor(ROOT.kOrange))
             #model.plotOn(yFrame, ROOT.RooFit.NormRange("Full"), ROOT.RooFit.LineStyle(ROOT.kDashed))
 
             

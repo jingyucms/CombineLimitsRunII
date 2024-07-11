@@ -8,6 +8,7 @@ import math
 import json
 import pickle
 import glob
+import ctypes
 
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
@@ -86,13 +87,16 @@ def getDatasetIntegralError(dataset, cutSpec=''):
 
 def getHistogramIntegralError(hist,binlow=1,binhigh=-1):
     if binhigh<0: binhigh = hist.GetNbinsX()
-    integralerr = ROOT.Double(0)
+    integralerr = ctypes.c_double(0)
+    #integralerr = ROOT.Double(0)
     hist.IntegralAndError(binlow,binhigh,integralerr,"")
-    return float(integralerr)
+    #print "DEBUG", integralerr,type(integralerr.value)
+    return integralerr.value
 
 def getHistogram2DIntegralError(hist,binxlow=1,binxhigh=-1,binylow=1,binyhigh=-1):
     if binxhigh<0: binxhigh = hist.GetNbinsX()
     if binyhigh<0: binyhigh = hist.GetNbinsY()
-    integralerr = ROOT.Double(0)
+    integralerr = ctypes.c_double(0)
+    #integralerr = ROOT.Double(0)
     hist.IntegralAndError(binxlow,binxhigh,binylow,binyhigh,integralerr,"")
-    return float(integralerr)
+    return integralerr.value

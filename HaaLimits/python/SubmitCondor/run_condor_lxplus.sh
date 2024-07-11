@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /afs/cern.ch/work/z/zhangj/private/RunIILimits/CMSSW_10_2_13/src/
+cd /afs/cern.ch/work/z/zhangj/private/RunIILimits/CMSSW_11_3_4/src/
 
 eval $(scramv1 runtime -sh)
 

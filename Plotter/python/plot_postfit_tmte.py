@@ -37,9 +37,16 @@ elif massRange == 'upsilon':
     xBinWidth = 0.1
     a = 11.
 elif massRange == 'highmass':
-    xRange = [11,45]
+    xRange = [11,25]
     xBinWidth = 0.5
     a = 15
+
+if year == '2018':
+    lumi = 59.830
+elif year == '2017':
+    lumi = 41.480
+elif year == '2016':
+    lumi = 36.330
 
 yRange = [0,1200]
 yBinWidth = 10
@@ -77,7 +84,7 @@ else:
     pdf_control_res = None
 
 
-fpostfit = open('../../HaaLimits/python/Impacts_TauMuTauE_{}_{}/fit.log'.format(massRange,year))
+fpostfit = open('../../HaaLimits/python/Impacts_TauMuTauE_{}_{}_h{}/fit.log'.format(massRange,year,h))
 params={}
 for line in fpostfit.readlines():
     txt = []
@@ -105,6 +112,8 @@ ma.setVal(a)
 
 sig_x = ws.pdf('ggH_haa_{}_TauMuTauE_{}_PP_x'.format(h,year))
 sig_y = ws.pdf('ggH_haa_{}_TauMuTauE_{}_PP_y'.format(h,year))
+sig_y1 = ws.pdf('ggH_haa_{}_TauMuTauE_{}_PP_y'.format(250,year))
+sig_y2 = ws.pdf('ggH_haa_{}_TauMuTauE_{}_PP_y'.format(500,year))
 
 ## if massRange == 'lowmass':
 ##     integral_postfit_cont = params['integral_cont1_TauHadTauHad_V3_2018_PP'] + params['integral_cont2_TauHadTauHad_V3_2018_PP']
@@ -135,6 +144,10 @@ sigintegral = ws.function('fullIntegral_ggH_haa_{}_TauMuTauE_{}_PP'.format(h,yea
 #sigintegral = 0
 #mh.setVal(250)
 #sigintegral_heavy = ws.function('fullIntegral_ggH_haa_{}_TauMuTauHad_V2_2018_PP'.format(250)).getVal() * br/0.001
+mh.setVal(250)
+sigintegral_1 = ws.function('fullIntegral_ggH_haa_{}_TauMuTauE_{}_PP'.format(250,year)).getVal() * br/0.001
+mh.setVal(500)
+sigintegral_2 = ws.function('fullIntegral_ggH_haa_{}_TauMuTauE_{}_PP'.format(500,year)).getVal() * br/0.001
 
 #print sigintegral,sigintegral_heavy
 data.Print()
@@ -213,7 +226,7 @@ CMS_lumi.cmsText = 'CMS'
 CMS_lumi.writeExtraText = isprelim
 #CMS_lumi.extraText = 'Preliminary'
 CMS_lumi.extraText = '#tau_{#mu}#tau_{#mu}'
-CMS_lumi.lumi_13TeV = "%0.1f fb^{-1}" % (59.8)
+CMS_lumi.lumi_13TeV = "%0.1f fb^{-1}" % (lumi)
 CMS_lumi.CMS_lumi(canvas,4,11)
 
 if massRange == 'lowmass' or massRange == 'upsilon':
@@ -324,7 +337,7 @@ CMS_lumi.cmsText = 'CMS'
 CMS_lumi.writeExtraText = isprelim
 #CMS_lumi.extraText = 'Preliminary'
 CMS_lumi.extraText = '#tau_{e}#tau_{#mu}'
-CMS_lumi.lumi_13TeV = "%0.1f fb^{-1}" % (59.8)
+CMS_lumi.lumi_13TeV = "%0.1f fb^{-1}" % (lumi)
 CMS_lumi.CMS_lumi(canvas,4,11)
 
 if massRange == 'lowmass':
@@ -400,7 +413,8 @@ padUp.Draw()
 yFrame = y.frame()
 
 sig_y.plotOn(yFrame,ROOT.RooFit.Normalization(sigintegral),ROOT.RooFit.LineColor(ROOT.kRed))#,
-
+sig_y1.plotOn(yFrame,ROOT.RooFit.Normalization(sigintegral_1),ROOT.RooFit.LineColor(ROOT.kOrange-6))#,
+sig_y2.plotOn(yFrame,ROOT.RooFit.Normalization(sigintegral_2),ROOT.RooFit.LineColor(ROOT.kGreen+3))#,
 pdf_y.plotOn(yFrame,ROOT.RooFit.Normalization(integral_postfit),ROOT.RooFit.LineColor(ROOT.kBlue), ROOT.RooFit.Name('central'))
 
 data.plotOn(yFrame)
@@ -440,7 +454,7 @@ CMS_lumi.cmsText = 'CMS'
 CMS_lumi.writeExtraText = isprelim
 #CMS_lumi.extraText = 'Preliminary'
 CMS_lumi.extraText = '#tau_{e}#tau_{#mu}'
-CMS_lumi.lumi_13TeV = "%0.1f fb^{-1}" % (59.8)
+CMS_lumi.lumi_13TeV = "%0.1f fb^{-1}" % (lumi)
 CMS_lumi.CMS_lumi(canvas,4,11)
 
 
@@ -470,6 +484,10 @@ for prim in reversed(padUp.GetListOfPrimitives()):
     elif 'ggH' in prim.GetTitle() and '250' in prim.GetTitle():
         #title = '#splitline{{m_{{H}} = {} GeV, m_{{a}} = {} GeV}}{{B(h #rightarrow aa #rightarrow #mu#mu#tau#tau) = {}}}'.format(h,a,floatToText(br))
         title = 'm_{{H}} = {} GeV, m_{{a}} = {} GeV'.format(250,a)
+        legend.AddEntry(prim, title, 'l')
+    elif 'ggH' in prim.GetTitle() and '500' in prim.GetTitle():
+        #title = '#splitline{{m_{{H}} = {} GeV, m_{{a}} = {} GeV}}{{B(h #rightarrow aa #rightarrow #mu#mu#tau#tau) = {}}}'.format(h,a,floatToText(br))
+        title = 'm_{{H}} = {} GeV, m_{{a}} = {} GeV'.format(500,a)
         legend.AddEntry(prim, title, 'l')
 legend.AddEntry('central', 'Background Model', 'l')
 #legend.AddEntry('Fake', 'Tight-to-Loose Ratio Uncertainty', 'l')

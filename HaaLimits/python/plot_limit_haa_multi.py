@@ -19,12 +19,32 @@ autoSkip = False
 strictChecking = False
 isprelim = False
 amasses = [5,7,9,11,13,15,17,19,21]
-hmasses = [125] #[125,300,750]
+hmasses = [250] #[125,300,750]
 
 #hmasses = [125,300]
 #hmasses = [750] # for now since it is done
-amasses_full = [x*.1 for x in range(36,210,1)] + [21.0]
-#amasses_full.remove(10.4)
+amasses_full = [round(x*.1,1) for x in range(36,250,1)] + [25.0]
+#amasses_full.remove(3.7)
+#amasses_full.remove(7.8)
+#amasses_full.remove(6.2)
+#amasses_full.remove(9.8)
+## amasses_full.remove(24.5)
+## amasses_full.remove(7.6)
+## amasses_full.remove(5.5)
+## amasses_full.remove(4.4)
+## amasses_full.remove(6.8)
+## amasses_full.remove(7.8)
+## amasses_full.remove(7.9)
+## amasses_full.remove(22.2)
+## amasses_full.remove(23.3)
+# amasses_full.remove(6.5)
+# amasses_full.remove(6.6)
+# amasses_full.remove(7.5)
+# amasses_full.remove(7.6)
+amasses_full.remove(16.5)
+amasses_full.remove(20.0)
+#amasses_full.remove(20.5)
+#amasses_full.remove(23.8)
 #amasses_full = [x*.1 for x in range(60,210,1)]
 
 #amasses_full = [x for x in range(10,46)]
@@ -63,13 +83,14 @@ hs_grid_dir = '/hdfs/store/user/dntaylor/2019-11-27_MuMuTauTauLimits_MergedGridP
 #higgsCombineHtoAAH125A20_mm_h_parametric_highmassWith1DFitsDVteth.AsymptoticLimits.mH125.root 
 
 
-#tag = 'REGION_TauMuTauHad_V2_2016_MVAMedium_DG_DoubleExpo_yRange_wFakeTauScaleFit_PPonly'
-tag = 'REGION_TauHadTauHad_V3_2017_MVAMedium_DG_DoubleExpo_yRange_wFakeJECFit_PPonly'
-#tag = 'REGION_TauMuTauMu_2016_MVAMedium_DG_wFakeTauScaleFit_PPonly'
-#tag = 'REGION_TauMuTauE_2016_MVAMedium_DG_wFakeTauScaleFit_PPonly'
+tag = 'REGION_TauMuTauHad_V2_2018_MVAMedium_DG_DoubleExpo_yRange_wFakeTauScaleFit_PPonly'
+#tag = 'REGION_TauHadTauHad_V3_2018_MVAMedium_DG_DoubleExpo_yRange_wFakeJECFit_PPonly'
+#tag = 'REGION_TauMuTauE_2018_MVAMedium_DG_wFakeTauScaleFit_PPonly'
 #tag = 'REGION_TauETauHad_2018_MVAMedium_DG_yRange_wFakeTauScaleFit_PPonly'
 #tag = 'REGION_allchs_2018_V6'
 #tag = 'REGION_allchs_V6'
+
+#tag = 'REGION_TauMuTauMu_2016_MVAMedium_DG_wFakeTauScaleFit_PPonly'
 
 
 prefix = '_mmmt_mm_h_parametric_unbinned_unblind'
@@ -374,16 +395,18 @@ def readQs(mode,h,a):
 
 regionXs = {
     'lowmass' : [3.6,8],
-    'upsilon' : [8,12.5],
-    'highmass': [12.5,21],
+    #'lowmass' : [6,8],
+    'upsilon' : [8,11.5],
+    'highmass': [11.5,25],
 }
 
 for m in allModes:
     #print m
     if 'REGION' in m:
         mlow = m.replace('REGION','lowmass')
-        dfile = ROOT.TFile.Open('datacards_shape/MuMuTauTau/mmmt_mm_h_parametric_unbinned_lowmass_TauMuTauHad_V2_2018_MVAMedium_DG_DoubleExpo_yRange_wFakeTauScaleFit_PPonly.root')  ### only needed to get the xsecs
+        dfile = ROOT.TFile.Open('datacards_shape/MuMuTauTau/mmmt_mm_h_parametric_unbinned_unblind_lowmass_TauMuTauHad_V2_2018_MVAMedium_DG_DoubleExpo_yRange_wFakeTauScaleFit_PPonly.root')  ### only needed to get the xsecs
         regionModes = [m.replace('REGION',x) for x in ['lowmass','upsilon','highmass']]
+        #regionModes = [m.replace('REGION',x) for x in ['upsilon','highmass']]
     else:
         dfile = ROOT.TFile.Open('datacards_shape/MuMuTauTau/{m}.root'.format(m=m))
         regionModes = [m]
@@ -584,7 +607,7 @@ for m in allModes:
             plotMethod(       goodas[m][h], quartilesxsecsm[m][h],'{pdir}/{m}-limits/{h}_xsec_sm_log_smooth'.format(pdir=pdir,h=h,m=m),  goodqs=goodqs[m][h], xaxis='m_{a} (GeV)', smooth=True, yaxis=label,blind=b,logy=1,ymin=ymin,ymax=ymax,legendpos=lpos,numcol=1,plotunity=False,leftmargin=0.20,legendtitle=legendtitle,additionaltext=additionaltext,isprelim=isprelim)
 
         ymin = 0
-        ymax = 2e-3
+        ymax = 5e-3
         if h==300: ymax = 2e-3
         if h==750: ymax = 2e-2
         plotMethod(       goodas[m][h], quartilesbr[m][h],  '{pdir}/{m}-limits/{h}_br'.format(pdir=pdir,h=h,m=m),               goodqs=goodqs[m][h], xaxis='m_{a} (GeV)',              yaxis=thisbr,blind=b,logy=0,ymin=ymin,ymax=ymax,legendpos=lpos,numcol=1,plotunity=False,leftmargin=0.20,legendtitle=legendtitle,additionaltext=additionaltext,isprelim=isprelim)

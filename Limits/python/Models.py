@@ -459,9 +459,9 @@ class Param(object):
                 if "integral" in paramName:
                     #shiftFormula += ''
                 #if False:
-                    shiftFormula += ' + TMath::Max(0,TMath::Exp(@{shift})-1)*({up}) + TMath::Min(0,TMath::Exp(@{shift})-1)*({down})'.format(shift=len(args),up=up,down=down)
+                    shiftFormula += ' + TMath::Max(0.0,TMath::Exp(@{shift})-1)*({up}) + TMath::Min(0.0,TMath::Exp(@{shift})-1)*({down})'.format(shift=len(args),up=up,down=down)
                 else:
-                    shiftFormula += ' + TMath::Max(0,@{shift})*({up}) + TMath::Min(0,@{shift})*({down})'.format(shift=len(args),up=up,down=down)
+                    shiftFormula += ' + TMath::Max(0.0,@{shift})*({up}) + TMath::Min(0.0,@{shift})*({down})'.format(shift=len(args),up=up,down=down)
                 args.Add(ws.var(shift))
         if uncertainty > 0:
         #if uncertainty > 0 and not 'lambda_conty' in paramName and not 'erf' in paramName:
@@ -477,12 +477,12 @@ class Param(object):
             if "integral" in paramName:
                 #shiftFormula += ''
             #if False:
-                shiftFormula += ' + TMath::Max(0,TMath::Exp(@{shift})-1)*({up}) + TMath::Min(0,TMath::Exp(@{shift})-1)*({down})'.format(shift=len(args),up=uncrt,down=uncrt)
+                shiftFormula += ' + TMath::Max(0.0,TMath::Exp(@{shift})-1)*({up}) + TMath::Min(0.0,TMath::Exp(@{shift})-1)*({down})'.format(shift=len(args),up=uncrt,down=uncrt)
             else:
                 #if 'erf' in paramName:
                 #    shiftFormula += ' + TMath::Max(0,@{shift})*({down}) + TMath::Min(0,@{shift})*({up})'.format(shift=len(args),up=uncrt,down=uncrt)
                 #else:
-                shiftFormula += ' + TMath::Max(0,@{shift})*({up}) + TMath::Min(0,@{shift})*({down})'.format(shift=len(args),up=uncrt,down=uncrt)
+                shiftFormula += ' + TMath::Max(0.0,@{shift})*({up}) + TMath::Min(0.0,@{shift})*({down})'.format(shift=len(args),up=uncrt,down=uncrt)
             args.Add(ws.var(uncrtTxt))
         
         arglist = ROOT.RooArgList(args)
@@ -537,9 +537,9 @@ class Spline(object):
                         
                         #if 'integral' in splineName:
                         if False:
-                            shiftFormula += ' + TMath::Max(0,TMath::Exp(@{shift})-1)*({up}) + TMath::Min(0,TMath::Exp(@{shift})-1)*({down})'.format(shift=len(args),up=len(args)+1,down=len(args)+2)
+                            shiftFormula += ' + TMath::Max(0.0,TMath::Exp(@{shift})-1)*({up}) + TMath::Min(0.0,TMath::Exp(@{shift})-1)*({down})'.format(shift=len(args),up=len(args)+1,down=len(args)+2)
                         else:
-                            shiftFormula += ' + TMath::Max(0,@{shift})*@{up} + TMath::Min(0,@{shift})*@{down}'.format(shift=len(args),up=len(args)+1,down=len(args)+2)
+                            shiftFormula += ' + TMath::Max(0.0,@{shift})*@{up} + TMath::Min(0.0,@{shift})*@{down}'.format(shift=len(args),up=len(args)+1,down=len(args)+2)
                         
                         #print "Building splines:", ws.var(shiftText)
                         args.Add(ws.var(shiftText))
@@ -564,9 +564,9 @@ class Spline(object):
                     #if 'integral' in splineName or 'mean' in splineName or 'sigma' in splineName or 'width' in splineName:
                     #if 'integral' in splineName:
                     if False:
-                        shiftFormula += ' + TMath::Max(0,TMath::Exp(@{shift})-1)*({up}) + TMath::Min(0,TMath::Exp(@{shift})-1)*({down})'.format(shift=len(args),up=len(args)+1,down=len(args)+2)
+                        shiftFormula += ' + TMath::Max(0.0,TMath::Exp(@{shift})-1)*({up}) + TMath::Min(0.0,TMath::Exp(@{shift})-1)*({down})'.format(shift=len(args),up=len(args)+1,down=len(args)+2)
                     else:
-                        shiftFormula += ' + TMath::Max(0,@{shift})*@{up} + TMath::Min(0,@{shift})*@{down}'.format(shift=len(args),up=len(args)+1,down=len(args)+2)
+                        shiftFormula += ' + TMath::Max(0.0,@{shift})*@{up} + TMath::Min(0.0,@{shift})*@{down}'.format(shift=len(args),up=len(args)+1,down=len(args)+2)
                     args.Add(ws.var(shiftText))
                     args.Add(splineUp)
                     args.Add(splineDown)
@@ -595,7 +595,7 @@ class Spline(object):
                         down = c-d
                         if c and (abs(up/c)<uncertainty and abs(down/c)<uncertainty): continue
                         ws.factory('{}[0,-10,10]'.format(shift))
-                        shiftFormula += ' + TMath::Max(0,@{shift})*({up:g}) + TMath::Min(0,@{shift})*({down:g})'.format(shift=len(pargs),up=up,down=down)
+                        shiftFormula += ' + TMath::Max(0.0,@{shift})*({up:g}) + TMath::Min(0.0,@{shift})*({down:g})'.format(shift=len(pargs),up=up,down=down)
                         pargs.add(ws.var(shift))
                     pname = 'p{}_{}'.format(p,splineName)
                     pform = ROOT.RooFormulaVar(pname,pname,shiftFormula,pargs)

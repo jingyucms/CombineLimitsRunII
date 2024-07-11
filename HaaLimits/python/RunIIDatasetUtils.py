@@ -51,6 +51,7 @@ def getRooDataset(f,selection='1',weight='',xRange=[],yRange=[],project='',xVar=
     if yVar!='visFourbodyMass':args.find('visFourbodyMass').SetName(yVar)
     ds = ROOT.RooDataSet(ds.GetName(),ds.GetTitle(),ds,args,selection)
     if project: ds = getattr(ds,'reduce')(ROOT.RooArgSet(ds.get().find(project)))
+    print selection
     print "dsIntegral:", ds.sumEntries()
     return ds
 
@@ -67,6 +68,7 @@ def getRooDatasetWeight(f,selection='1',weight='fakeRateEfficiency',xRange=[],yR
     if yVar!='visFourbodyMass':args.find('visFourbodyMass').SetName(yVar)
     ds = ROOT.RooDataSet(ds.GetName(),ds.GetTitle(),ds,args,selection,weight)
     if project: ds = getattr(ds,'reduce')(ROOT.RooArgSet(ds.get().find(project)))
+    print selection
     print "dsIntegral:", ds.sumEntries()
     return ds
 
@@ -158,18 +160,26 @@ def getDataset(File,channel,type,shift,do2D,xVar='invMassMuMu',yVar='visFourbody
         thisyrange = [100, 230]
     elif 'hm250' in File and 'TauHadTauHad' in File:
         thisyrange = [120, 280]
+    elif 'hm250' in File and 'TauETauHad' in File:
+        thisyrange = [120, 280]
     elif 'hm500' in File and 'TauMuTauHad' in File:
         thisyrange = [200, 500]
     elif 'hm500' in File and 'TauHadTauHad' in File:
         thisyrange = [220, 550]
+    elif 'hm500' in File and 'TauETauHad' in File:
+        thisyrange = [200, 1000]
     elif 'hm750' in File and 'TauMuTauHad' in File:
         thisyrange = [250, 750]
     elif 'hm750' in File and 'TauHadTauHad' in File:
         thisyrange = [250, 800]
+    elif 'hm750' in File and 'TauETauHad' in File:
+        thisyrange = [200, 1000]
     elif 'hm1000' in File and 'TauMuTauHad' in File:
         thisyrange = [250, 1000]
     elif 'hm1000' in File and 'TauHadTauHad' in File:
         thisyrange = [250, 1200]
+    elif 'hm1000' in File and 'TauETauHad' in File:
+        thisyrange = [200, 1000]
     else:
         thisyrange = yRange
     thisxrange = xRange
