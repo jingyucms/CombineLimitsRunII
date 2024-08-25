@@ -39,9 +39,9 @@ def which(program):
     return None
 
 def getLumi():
-    #return 36330.060 # full 2016
+    return 36330.060 # full 2016
     #return 41480 # full 2017 
-    return 59830 # full 2018
+    #return 59830 # full 2018
     #return 137640 # full run 2
 
 def runCommand(command):

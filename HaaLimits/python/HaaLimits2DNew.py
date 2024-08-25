@@ -218,7 +218,7 @@ class HaaLimits2D(HaaLimits):
                 erf1 = Models.Erf('erf1',
                     x = yVar,
                     erfScale = kwargs.pop('erfScale_{}'.format(nameE1), [0.05,0.01,0.1]),
-                    erfShift = kwargs.pop('erfShift_{}'.format(nameE1), [70,10,100]),
+                    erfShift = kwargs.pop('erfShift_{}'.format(nameE1), [60,10,100]),
                 )
                 erf1.build(workspace,nameE1)
 
@@ -273,7 +273,7 @@ class HaaLimits2D(HaaLimits):
 
                 land = Models.Landau('land',
                                    x = yVar,
-                                   mu    = kwargs.pop('mu_{}'.format(nameL1), [90,40,100]),
+                                   mu    = kwargs.pop('mu_{}'.format(nameL1), [90,60,120]),
                                    sigma = kwargs.pop('sigma_{}'.format(nameL1), [50,0,100]),
                 )
                 land.build(workspace, nameL1)
@@ -324,9 +324,10 @@ class HaaLimits2D(HaaLimits):
 
         doPoly = False
         doPolyExpo = False
+        doHHDouble = False
 
         # the 2D model
-        if self.SPLITY:
+        if self.SPLITY:  ## Always false as of September 2024
             if (self.XRANGE[0]<4) and not (doPoly or doPolyExpo):
                 if self.YCORRELATION:
                     cont1 = Models.Prod('cont1',
@@ -451,7 +452,7 @@ class HaaLimits2D(HaaLimits):
                     bgs[nameU] = [0.9,0,1]
 
             bg = Models.Sum('bg', **bgs)
-        elif self.YCORRELATION:
+        elif self.YCORRELATION:     ## Always false as of September 2024
             if self.XRANGE[0]<4 and not (doPoly or doPolyExpo):
                 cont1 = Models.Prod('cont1',
                     'bg_{}_y|{}'.format(region,xVar),
@@ -523,7 +524,7 @@ class HaaLimits2D(HaaLimits):
                 name = 'cont_{}_xy'.format(region)
                 cont1.build(workspace,name)
             else: 
-                if (self.XRANGE[0]<4 and "TauMuTauHad" in region) or (self.XRANGE[0]<4 and "TauHadTauHad" in region):
+                if (self.XRANGE[0]<4 and "TauMuTauHad" in region) or (self.XRANGE[0]<4 and "TauHadTauHad" in region) or (self.XRANGE[0]>10 and "TauHadTauHad" in region and doHHDouble):
                     cont1 = Models.Prod('cont1',
                         'cont1_{}_x'.format(region),
                         'bg_{}_y'.format(region),
@@ -1950,7 +1951,7 @@ class HaaLimits2D(HaaLimits):
                 prim.GetYaxis().SetTitleOffset(0.35)
                 prim.GetYaxis().SetNdivisions(505)
                 prim.GetYaxis().SetTitle('Pull')
-                prim.GetYaxis().SetRangeUser(-5,5)
+                prim.GetYaxis().SetRangeUser(-2,2)
                 continue
         canvas.cd()
         python_mkdir(self.plotDir)

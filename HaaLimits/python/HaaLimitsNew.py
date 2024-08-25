@@ -385,12 +385,24 @@ class HaaLimits(Limits):
                                     order = order,
             )
             cont.build(workspace,nameCpoly)
-        
-        if (self.XRANGE[0]<4 and "TauMuTauHad" in tag) or (self.XRANGE[0]<4 and "TauHadTauHad" in tag):
+
+
+        doHHPoly = False
+        doHHDouble = False
+        if self.XRANGE[0]>10 and "TauHadTauHad" in tag and doHHPoly:
+            nameC = 'cont_{}'.format(tag if tag else '')
+            cont = Models.Chebychev(nameC,
+                                    x = xVar,
+                                    order = 5
+                                    )
+            cont.build(workspace,nameC)
+            
+        #elif (self.XRANGE[0]<4 and "TauMuTauHad" in tag) or (self.XRANGE[0]<4 and "TauHadTauHad" in tag):
+        elif (self.XRANGE[0]<4 and "TauMuTauHad" in tag) or (self.XRANGE[0]<4 and "TauHadTauHad" in tag) or (self.XRANGE[0]>10 and "TauHadTauHad" in tag and doHHDouble):
             nameC1 = 'cont1_{}'.format(tag if tag else '')
             cont1 = Models.Exponential(nameC1,
                                        x = xVar,
-                                       lamb = kwargs.pop('lambda_{}'.format(nameC1),[-0.1,-1,0]), #-2,-4,0
+                                       lamb = kwargs.pop('lambda_{}'.format(nameC1),[-0.2,-1,0]), #-2,-4,0
             )
             cont1.build(workspace,nameC1)
 
@@ -1055,13 +1067,13 @@ class HaaLimits(Limits):
                 prim.GetXaxis().SetTitleSize(0.21)
                 prim.GetXaxis().SetTitleOffset(1.0)
                 prim.GetXaxis().SetLabelOffset(0.03)
-                prim.GetYaxis().SetLabelSize(0.08)
+                prim.GetYaxis().SetLabelSize(0.2)
                 prim.GetYaxis().SetLabelOffset(0.006)
                 prim.GetYaxis().SetTitleSize(0.21)
                 prim.GetYaxis().SetTitleOffset(0.35)
-                prim.GetYaxis().SetNdivisions(508)
+                prim.GetYaxis().SetNdivisions(501)
                 prim.GetYaxis().SetTitle('Pull')
-                prim.GetYaxis().SetRangeUser(-6,6)
+                prim.GetYaxis().SetRangeUser(-2,2)
                 continue
         canvas.cd()
         python_mkdir(self.plotDir)

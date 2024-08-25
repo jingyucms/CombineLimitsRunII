@@ -672,7 +672,7 @@ class Chebychev(Model):
         logging.debug('Building {}'.format(label))
         order = self.kwargs.get('order',1)
         params = ['p{}_{}'.format(o,label) for o in range(order)]
-        ranges = [self.kwargs.get('p{}'.format(o),[0,-1,1]) for o in range(order)]
+        ranges = [self.kwargs.get('p{}'.format(o),[0,-2,2]) for o in range(order)]
         for p,rs in zip(params,ranges):
             ws.factory('{}[{}]'.format(p,', '.join([str(r) for r in rs])))
         #ws.factory('Chebychev::{}({}, {{ {} }})'.format(label, self.x, ', '.join(['{}[{}]'.format(p,','.join([str(r) for r in rs])) for p,rs in zip(params,ranges)])))

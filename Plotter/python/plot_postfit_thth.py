@@ -44,9 +44,9 @@ elif massRange == 'upsilon':
     xBinWidth = 0.1
     a = 11
 elif massRange == 'highmass':
-    xRange = [11,50]
+    xRange = [11,45]
     xBinWidth = 0.5
-    a = 45
+    a = 40
 elif massRange == 'highhiggs':
     xRange = [28,52]
     xBinWidth = 0.5
@@ -55,7 +55,7 @@ elif massRange == 'highhiggs':
 yRange = [0,1200]
 yBinWidth = 10
 blind = False
-br = 0.0005
+br = 0.005
 doPostfit = False
 
 amasses = ['3p6','5','9','13','17','21']
@@ -493,6 +493,10 @@ for prim in reversed(padUp.GetListOfPrimitives()):
     elif 'ggH' in prim.GetTitle() and '500' in prim.GetTitle():
         #title = '#splitline{{m_{{H}} = {} GeV, m_{{a}} = {} GeV}}{{B(h #rightarrow aa #rightarrow #mu#mu#tau#tau) = {}}}'.format(h,a,floatToText(br))
         title = 'm_{{H}} = {} GeV, m_{{a}} = {} GeV'.format(500,a)
+        legend.AddEntry(prim, title, 'l')
+    elif 'ggH' in prim.GetTitle() and '1000' in prim.GetTitle():
+        #title = '#splitline{{m_{{H}} = {} GeV, m_{{a}} = {} GeV}}{{B(h #rightarrow aa #rightarrow #mu#mu#tau#tau) = {}}}'.format(h,a,floatToText(br))
+        title = 'm_{{H}} = {} GeV, m_{{a}} = {} GeV'.format(1000,a)
         legend.AddEntry(prim, title, 'l')
 legend.AddEntry('central', 'Background Model', 'l')
 #legend.AddEntry('Fake', 'Tight-to-Loose Ratio Uncertainty', 'l')

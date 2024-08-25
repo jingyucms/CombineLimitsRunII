@@ -1,10 +1,10 @@
 #!/bin/bash
 
-export HMASS=500
+export HMASS=1000
 #export CHANNEL=TauMuTauE
 #export CHANNEL=TauHadTauHad_2016_2017_2018
                                          
-export PREFIX=mmmt_mm_h_parametric_unbinned_unblind
+export PREFIX=mmmt_mm_h_parametric_unbinned
 
 
 #export CHANNEL=TauMuTauHad_TauETauHad_TauHadTauHad_TauMuTauE_2016_2017_2018
@@ -20,26 +20,26 @@ export PREFIX=mmmt_mm_h_parametric_unbinned_unblind
 #export CHANNEL=TauMuTauE_2018
 #export CHANNEL=TauMuTauMu_2018
 
-export channel=TauHadTauHad_V3
-#export channel=TauMuTauHad_V2
+#export channel=TauHadTauHad_V3
+export channel=TauMuTauHad_V2
 #export channel=TauMuTauE
 #export channel=TauMuTauMu
 #export channel=TauETauHad
 
 #export TFUNC=DG_yRange_wFakeTauScaleFit_PPonly
-#export TFUNC=DG_DoubleExpo_yRange_wFakeTauScaleFit_PPonly
-export TFUNC=DG_DoubleExpo_yRange_wFakeJECFit_PPonly
+export TFUNC=DG_DoubleExpo_yRange_wFakeTauScaleFit_PPonly
+#export TFUNC=DG_DoubleExpo_yRange_wFakeJECFit_PPonly
 #export TFUNC=DG_wFakeTauScaleFit_PPonly
 
-for year in 2016 2017 2018
-#for year in 2018
+#for year in 2016 2017 2018
+for year in 2018
 do
     for wp in MVAMedium
     do    
         export WP=$wp
 	export CHANNEL=${channel}_${year}
         #for r in lowmass upsilon highmass
-	for r in upsilon
+	for r in upsilon highmass
         do
     	export MREGION=$r
     	echo $MREGION
@@ -54,7 +54,7 @@ do
     	fi
     	if [[ $MREGION == upsilon ]]
     	then
-    	    for m in `seq 8 0.1 10`
+    	    for m in `seq 8 1 14`
     	    do
     		export AMASS=$m
     		echo Arguments: $HMASS $AMASS $MREGION $CHANNEL $WP
@@ -63,7 +63,7 @@ do
     	fi
     	if [[ $MREGION == highmass ]]
     	then
-    	    for m in `seq 11 0.1 25`
+    	    for m in `seq 11 1 50`
     	    do
     		export AMASS=$m
     		echo Arguments: $HMASS $AMASS $MREGION $CHANNEL $WP

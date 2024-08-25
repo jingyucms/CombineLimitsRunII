@@ -16,7 +16,7 @@ def floatToText(x):
 
 isprelim = True
 yvar = 'h'
-h = 125
+h = 1000
 xVar = 'invMassMuMu'
 yVar = 'visFourbodyMass'
 #massRange = 'lowmass'
@@ -36,9 +36,9 @@ elif massRange == 'upsilon':
     xBinWidth = 0.1
     a = 11.
 elif massRange == 'highmass':
-    xRange = [11,25]
+    xRange = [11,45]
     xBinWidth = 0.5
-    a = 15
+    a = 40
 
 if year == '2018':
     lumi = 59.830
@@ -50,7 +50,7 @@ elif year == '2016':
 yRange = [0,800]
 yBinWidth = 10
 blind = False
-br = 0.0005
+br = 0.005
 doPostfit = False
 
 amasses = ['3p6','5','9','13','17','21']
@@ -85,7 +85,7 @@ else:
     pdf_control_res = None
 
 
-fpostfit = open('../../HaaLimits/python/Impacts_TauMuTauHad_{}_{}_h125/fit.log'.format(massRange,year))
+fpostfit = open('../../HaaLimits/python/Impacts_TauMuTauHad_{}_{}_h1000/fit.log'.format(massRange,year))
 params={}
 print "Fitted Params"
 for line in fpostfit.readlines():
@@ -579,6 +579,10 @@ for prim in reversed(padUp.GetListOfPrimitives()):
     elif 'ggH' in prim.GetTitle() and '500' in prim.GetTitle():
         #title = '#splitline{{m_{{H}} = {} GeV, m_{{a}} = {} GeV}}{{B(h #rightarrow aa #rightarrow #mu#mu#tau#tau) = {}}}'.format(h,a,floatToText(br))
         title = 'm_{{H}} = {} GeV, m_{{a}} = {} GeV'.format(500,a)
+        legend.AddEntry(prim, title, 'l')
+    elif 'ggH' in prim.GetTitle() and '1000' in prim.GetTitle():
+        #title = '#splitline{{m_{{H}} = {} GeV, m_{{a}} = {} GeV}}{{B(h #rightarrow aa #rightarrow #mu#mu#tau#tau) = {}}}'.format(h,a,floatToText(br))
+        title = 'm_{{H}} = {} GeV, m_{{a}} = {} GeV'.format(1000,a)
         legend.AddEntry(prim, title, 'l')
 legend.AddEntry('central', 'Background Model', 'l')
 #legend.AddEntry('Fake', 'Tight-to-Loose Ratio Uncertainty', 'l')

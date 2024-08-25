@@ -7,22 +7,22 @@
 #setenv amass 5.0
 #foreach channel (allchs)
 #foreach channel (TauMuTauHad_V2 TauHadTauHad_V3 TauETauHad TauMuTauE TauMuTauMu)
-setenv h 125
+setenv h 1000
 #foreach channel (TauMuTauHad_V2 TauHadTauHad_V3 TauETauHad TauMuTauE)
 #foreach channel (TauETauHad TauMuTauE)
-#foreach channel (TauHadTauHad_V3)
-foreach channel (TauMuTauMu)
+foreach channel (TauHadTauHad_V3 TauMuTauHad_V2)
+#foreach channel (TauMuTauHad_V2)
 #foreach channel (allchs)
     foreach region (lowmass upsilon highmass)
     #foreach region (upsilon highmass highhiggs)
-	foreach year (2016 2017 2018)
-	#foreach year (all)
+	#foreach year (2016 2017 2018)
+	foreach year (2018)
             if ($region == lowmass) then
     	    setenv amass 5.0
             else if ($region == upsilon) then
     	    setenv amass 11.0
 	    else if ($region == highmass) then
-    	    setenv amass 15.0
+    	    setenv amass 40.0
             else
     	    setenv amass 45.0
 	    endif
@@ -47,11 +47,11 @@ foreach channel (TauMuTauMu)
             setenv workDir Impacts_${channelT}_${region}_${year}_h${h}
 	    #setenv workDir Impacts_${channelT}_${region}_h${h}
             if ($Tfunc == all) then
-        	setenv datacard mmmt_mm_h_parametric_unbinned_unblind_${region}_${channel}_${year}_hm${h}_amX
-		#setenv datacard mmmt_mm_h_parametric_unbinned_unblind_${region}_${channel}_hm${h}_amX
+        	#setenv datacard mmmt_mm_h_parametric_unbinned_unblind_${region}_${channel}_${year}_hm${h}_amX
+		setenv datacard mmmt_mm_h_parametric_unbinned_${region}_${channel}_hm${h}_amX
             else
-		#setenv datacard mmmt_mm_h_parametric_unbinned_${region}_${channel}_${year}_${Tfunc}_hm${h}_amX
-        	setenv datacard mmmt_mm_h_parametric_unbinned_unblind_${region}_${channel}_${year}_${Tfunc}_hm${h}_amX
+		setenv datacard mmmt_mm_h_parametric_unbinned_${region}_${channel}_${year}_${Tfunc}_hm${h}_amX
+        	#setenv datacard mmmt_mm_h_parametric_unbinned_unblind_${region}_${channel}_${year}_${Tfunc}_hm${h}_amX
             endif
             
             rm -rf $workDir
